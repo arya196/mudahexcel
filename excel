@@ -1,0 +1,2824 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Excel Function Challenge — Pembelajaran Berbasis Kasus</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            excel: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              500: '#10b981',
+              600: '#107c41',
+              700: '#0b5c30',
+              800: '#064e3b',
+              900: '#022c22',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    /* Custom subtle grid & scrollbars */
+    .excel-grid-scroll::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    .excel-grid-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .excel-grid-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .excel-grid-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Smooth pulse for target cells */
+    @keyframes targetPulse {
+      0%, 100% {
+        box-shadow: inset 0 0 0 2px #107c41;
+      }
+      50% {
+        box-shadow: inset 0 0 0 2px #f59e0b;
+      }
+    }
+    .target-cell-highlight {
+      animation: targetPulse 2.4s infinite ease-in-out;
+    }
+
+    /* Fade slide transition */
+    .fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-emerald-200 selection:text-emerald-900">
+
+  <!-- ==================== TOP HEADER & RESEARCH METRICS ==================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+      <!-- Top Row: Brand & Action Buttons -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-excel-600 to-excel-700 text-white flex items-center justify-center shadow-md shadow-emerald-900/15 shrink-0">
+            <i class="fa-solid fa-table-cells text-xl"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
+                Excel Function Challenge
+              </h1>
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-excel-700 border border-emerald-200">
+                <i class="fa-solid fa-flask text-[10px]"></i> Riset Transfer Belajar
+              </span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium">
+              Pembelajaran Berbasis Kasus: <span class="text-excel-600 font-semibold">Select</span> <i class="fa-solid fa-arrow-right text-[10px] mx-0.5 text-slate-400"></i> <span class="text-amber-600 font-semibold">Predict</span> <i class="fa-solid fa-arrow-right text-[10px] mx-0.5 text-slate-400"></i> <span class="text-sky-600 font-semibold">Test</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Utility Buttons -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <button
+            type="button"
+            onclick="openSyntaxModal()"
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 transition active:scale-[0.99]"
+          >
+            <i class="fa-solid fa-book-open text-excel-600"></i>
+            <span>Contoh Format Penulisan</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="openReportModal()"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-excel-600 hover:bg-excel-700 shadow-sm shadow-emerald-900/15 transition active:scale-[0.99]"
+          >
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Rapor & Log Kognitif</span>
+            <span id="headerCompletedBadge" class="ml-0.5 px-1.5 py-0.2 rounded-md bg-white/20 text-[11px] font-mono">0/4</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Row: 3 Live Research Variable Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3.5 pt-3.5 border-t border-slate-100">
+        <!-- Variabel 1: Pemahaman Konseptual -->
+        <div class="bg-slate-50/90 border border-slate-200/80 rounded-xl p-2.5 sm:p-3 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-emerald-100 text-excel-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-brain"></i>
+              </span>
+              <div>
+                <h2 class="text-xs font-bold text-slate-800 leading-tight">Pemahaman Konseptual</h2>
+                <p class="text-[11px] text-slate-500">Diagnosa fungsi & alasan logis (Two-Tier)</p>
+              </div>
+            </div>
+            <span id="metricConceptualText" class="text-sm font-extrabold font-mono text-excel-700">0%</span>
+          </div>
+          <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div id="metricConceptualBar" class="h-full bg-excel-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Variabel 2: Transfer Belajar -->
+        <div class="bg-slate-50/90 border border-slate-200/80 rounded-xl p-2.5 sm:p-3 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-shuffle"></i>
+              </span>
+              <div>
+                <h2 class="text-xs font-bold text-slate-800 leading-tight">Transfer Belajar</h2>
+                <p class="text-[11px] text-slate-500">Adaptasi Near → Far Transfer & Trap</p>
+              </div>
+            </div>
+            <span id="metricTransferText" class="text-sm font-extrabold font-mono text-amber-600">0%</span>
+          </div>
+          <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div id="metricTransferBar" class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Variabel 3: Kemampuan Pemecahan Masalah -->
+        <div class="bg-slate-50/90 border border-slate-200/80 rounded-xl p-2.5 sm:p-3 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-bug-slash"></i>
+              </span>
+              <div>
+                <h2 class="text-xs font-bold text-slate-800 leading-tight">Pemecahan Masalah</h2>
+                <p class="text-[11px] text-slate-500">Mental tracing & efisiensi debugging</p>
+              </div>
+            </div>
+            <span id="metricProblemText" class="text-sm font-extrabold font-mono text-sky-600">0%</span>
+          </div>
+          <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div id="metricProblemBar" class="h-full bg-sky-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== CASE NAVIGATION STEPPER ==================== -->
+  <nav class="bg-slate-100/80 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2.5">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+          <i class="fa-solid fa-layer-group text-excel-600"></i> Pilih Studi Kasus Berjenjang:
+        </span>
+        <button
+          type="button"
+          onclick="confirmResetCurrentCase()"
+          class="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
+        >
+          <i class="fa-solid fa-rotate-left"></i> Reset Kasus Ini
+        </button>
+      </div>
+
+      <div id="caseTabsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==================== MAIN 2-COLUMN WORKSPACE ==================== -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- LEFT COLUMN (5 cols on lg): Case Narrative + Interactive Excel Spreadsheet -->
+      <section class="lg:col-span-5 flex flex-col gap-5 lg:sticky lg:top-44">
+        <!-- Case Narrative Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="bg-gradient-to-r from-excel-700 to-excel-600 px-5 py-3.5 text-white flex items-center justify-between gap-2">
+            <div>
+              <span id="caseLevelBadge" class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 text-white mb-1">
+                Level: Near Transfer
+              </span>
+              <h2 id="caseTitle" class="text-base sm:text-lg font-extrabold leading-snug">
+                Kasus 1: Rekap Kas & Kehadiran Piket
+              </h2>
+            </div>
+            <div id="caseStatusPill" class="shrink-0 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-100 border border-amber-300/30">
+              Sedang Dikerjakan
+            </div>
+          </div>
+
+          <div class="p-5 space-y-3.5">
+            <p id="caseNarrative" class="text-sm text-slate-700 leading-relaxed">
+              <!-- Narrative injected here -->
+            </p>
+
+            <!-- Goal Box -->
+            <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3.5 flex items-start gap-3">
+              <div class="w-7 h-7 rounded-lg bg-excel-600 text-white flex items-center justify-center shrink-0 mt-0.5 text-xs">
+                <i class="fa-solid fa-bullseye"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wide text-excel-800">Misi Tantangan</h3>
+                <p id="caseMission" class="text-xs sm:text-sm font-medium text-emerald-950 mt-0.5">
+                  <!-- Mission injected here -->
+                </p>
+              </div>
+            </div>
+
+            <!-- Cognitive Trap Warning Box -->
+            <div class="bg-amber-50/90 border border-amber-200 rounded-xl p-3 flex items-start gap-2.5">
+              <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5 text-sm"></i>
+              <p id="caseTrapHint" class="text-xs text-amber-900 leading-relaxed">
+                <!-- Trap clue injected here -->
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Excel Spreadsheet Card -->
+        <div class="bg-white rounded-2xl border border-slate-300 shadow-sm overflow-hidden">
+          <!-- Window Title Bar -->
+          <div class="bg-excel-600 text-white px-4 py-2 flex items-center justify-between text-xs font-semibold">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-file-excel"></i>
+              <span id="sheetFileName">BukuKerja_Kasus1.xlsx</span>
+            </div>
+            <span class="text-emerald-100 text-[11px]">Klik sel untuk melihat alamat koordinat</span>
+          </div>
+
+          <!-- Excel Formula Bar -->
+          <div class="bg-slate-50 border-b border-slate-300 px-3 py-2 flex items-center gap-2">
+            <!-- Name Box (Active Cell Coordinate) -->
+            <div
+              id="activeCellNameBox"
+              class="w-16 text-center font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg py-1.5 text-slate-800 shadow-inner"
+              title="Alamat Sel Aktif"
+            >
+              C8
+            </div>
+
+            <!-- fx Icon -->
+            <div class="px-2 py-1 text-slate-400 font-serif italic font-bold text-sm select-none border-r border-slate-200">
+              fx
+            </div>
+
+            <!-- Formula Bar Display -->
+            <div id="spreadsheetFormulaDisplay" class="flex-grow font-mono text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-500 flex items-center justify-between overflow-x-auto">
+              <span class="inline-flex items-center gap-1.5 text-amber-700 font-sans font-semibold">
+                <i class="fa-solid fa-lock text-[11px]"></i> Selesaikan Prediksi Hasil Terlebih Dahulu
+              </span>
+            </div>
+          </div>
+
+          <!-- Spreadsheet Table Grid -->
+          <div class="overflow-x-auto excel-grid-scroll">
+            <table id="excelGridTable" class="w-full border-collapse text-xs sm:text-sm select-none">
+              <!-- Rendered dynamically by JS -->
+            </table>
+          </div>
+
+          <!-- Spreadsheet Footer Legend -->
+          <div class="bg-slate-50 border-t border-slate-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
+            <div class="flex items-center gap-3">
+              <span class="inline-flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded bg-emerald-100 border-2 border-excel-600 inline-block"></span> Sel Target Formula
+              </span>
+              <span id="legendRefCell" class="hidden inline-flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded bg-amber-100 border border-amber-500 inline-block"></span> Sel Acuan Tetap
+              </span>
+            </div>
+            <span class="font-mono text-slate-400">Ready • Calc: Auto</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN (7 cols on lg): 3 Locked Pedagogical Phases -->
+      <section class="lg:col-span-7 flex flex-col gap-5">
+
+        <!-- ==================== TAHAP 1: FUNCTION SELECTION (TWO-TIER) ==================== -->
+        <div id="phase1Card" class="bg-white rounded-2xl border-2 border-excel-600 shadow-sm overflow-hidden transition-all">
+          <div class="px-5 py-4 bg-emerald-50/70 border-b border-emerald-100 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-excel-600 text-white font-extrabold text-sm flex items-center justify-center shadow-sm">
+                1
+              </span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm sm:text-base font-extrabold text-slate-900">
+                    Tahap 1: Function Selection (Two-Tier Diagnostic)
+                  </h3>
+                </div>
+                <p class="text-xs text-slate-600">Pilih fungsi yang tepat beserta alasan logisnya sebelum menulis rumus</p>
+              </div>
+            </div>
+            <span id="phase1Badge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-excel-800">
+              <i class="fa-solid fa-unlock mr-1"></i> Aktif
+            </span>
+          </div>
+
+          <div id="phase1Body" class="p-5 space-y-5">
+            <!-- Tier 1: Function Cards -->
+            <div>
+              <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-2.5">
+                Langkah 1A — Pilih Alat / Fungsi Excel yang Paling Tepat:
+              </label>
+              <div id="functionOptionsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <!-- Function option buttons injected here -->
+              </div>
+            </div>
+
+            <!-- Tier 2: Logical Reason -->
+            <div>
+              <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-2.5">
+                Langkah 1B — Mengapa Fungsi Tersebut Dipilih? (Alasan Logis):
+              </label>
+              <div id="reasonOptionsList" class="space-y-2">
+                <!-- Reason radio cards injected here -->
+              </div>
+            </div>
+
+            <!-- Phase 1 Feedback Alert -->
+            <div id="phase1Feedback" class="hidden rounded-xl p-3.5 text-xs sm:text-sm leading-relaxed"></div>
+
+            <!-- Phase 1 Action Button -->
+            <div class="flex items-center justify-between pt-1">
+              <span id="phase1AttemptsText" class="text-xs text-slate-500 font-medium">
+                Percobaan diagnosa: 0 kali
+              </span>
+              <button
+                type="button"
+                id="btnVerifyPhase1"
+                onclick="verifyPhase1()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-excel-600 hover:bg-excel-700 shadow-sm transition active:scale-[0.99]"
+              >
+                <i class="fa-solid fa-check-circle"></i>
+                <span>Verifikasi Pilihan & Alasan</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TAHAP 2: OUTPUT PREDICTION (MENTAL TRACING) ==================== -->
+        <div id="phase2Card" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all relative">
+          <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span id="phase2Number" class="w-8 h-8 rounded-xl bg-slate-300 text-slate-600 font-extrabold text-sm flex items-center justify-center">
+                2
+              </span>
+              <div>
+                <h3 class="text-sm sm:text-base font-extrabold text-slate-900">
+                  Tahap 2: Output Prediction (Simulasi Mental / Tracing)
+                </h3>
+                <p class="text-xs text-slate-600">Prediksi hasil di kepala terlebih dahulu untuk mencegah coba-coba buta</p>
+              </div>
+            </div>
+            <span id="phase2Badge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-600">
+              <i class="fa-solid fa-lock mr-1"></i> Terkunci
+            </span>
+          </div>
+
+          <!-- Locked Banner -->
+          <div id="phase2LockedOverlay" class="p-6 text-center bg-slate-50/60">
+            <div class="w-11 h-11 rounded-full bg-slate-200/80 text-slate-500 flex items-center justify-center mx-auto mb-2.5">
+              <i class="fa-solid fa-lock text-lg"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-700">Tahap Prediksi Hasil Masih Terkunci</p>
+            <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Selesaikan <span class="font-semibold text-excel-700">Tahap 1 (Memilih Fungsi & Alasan Logis)</span> terlebih dahulu untuk membuka simulasi prediksi hasil.
+            </p>
+          </div>
+
+          <!-- Unlocked Content -->
+          <div id="phase2Body" class="hidden p-5 space-y-4 fade-in">
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-center gap-2.5">
+              <i class="fa-solid fa-lightbulb text-amber-600 text-base shrink-0"></i>
+              <span>
+                <strong>Aturan Detektif Data:</strong> Editor rumus Excel sengaja dikunci sampai kamu mengunci prediksi hasil perhitungan manualmu di bawah ini!
+              </span>
+            </div>
+
+            <div id="predictionQuestionsContainer" class="space-y-4">
+              <!-- Dynamic prediction inputs injected here -->
+            </div>
+
+            <div id="phase2Feedback" class="hidden rounded-xl p-3.5 text-xs sm:text-sm"></div>
+
+            <div class="flex items-center justify-end pt-1">
+              <button
+                type="button"
+                id="btnLockPrediction"
+                onclick="lockPredictions()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-sm transition active:scale-[0.99]"
+              >
+                <i class="fa-solid fa-key"></i>
+                <span>Kunci Prediksi & Buka Editor Excel</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TAHAP 3: FORMULA TESTING & DEBUGGING SANDBOX ==================== -->
+        <div id="phase3Card" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all">
+          <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span id="phase3Number" class="w-8 h-8 rounded-xl bg-slate-300 text-slate-600 font-extrabold text-sm flex items-center justify-center">
+                3
+              </span>
+              <div>
+                <h3 class="text-sm sm:text-base font-extrabold text-slate-900">
+                  Tahap 3: Formula Testing & Debugging Sandbox
+                </h3>
+                <p class="text-xs text-slate-600">Ketik formula pada Formula Bar, jalankan simulasi, dan bandingkan dengan prediksimu</p>
+              </div>
+            </div>
+            <span id="phase3Badge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-600">
+              <i class="fa-solid fa-lock mr-1"></i> Terkunci
+            </span>
+          </div>
+
+          <!-- Locked Banner -->
+          <div id="phase3LockedOverlay" class="p-6 text-center bg-slate-50/60">
+            <div class="w-11 h-11 rounded-full bg-slate-200/80 text-slate-500 flex items-center justify-center mx-auto mb-2.5">
+              <i class="fa-solid fa-terminal text-lg"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-700">Editor Formula Excel Terkunci</p>
+            <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Selesaikan <span class="font-semibold text-amber-700">Tahap 2 (Prediksi Hasil)</span> untuk membuka Formula Bar interaktif dan menguji rumusmu.
+            </p>
+          </div>
+
+          <!-- Unlocked Content -->
+          <div id="phase3Body" class="hidden p-5 space-y-5 fade-in">
+            <!-- Interactive Formula Input Box -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label for="formulaInput" class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                  Formula Bar untuk Sel <span id="targetCellLabel" class="font-mono text-excel-700 bg-emerald-100 px-1.5 py-0.5 rounded">C8</span>:
+                </label>
+                <span class="text-[11px] text-slate-500">Mendukung pemisah <code class="font-mono bg-slate-100 px-1 rounded">,</code> maupun <code class="font-mono bg-slate-100 px-1 rounded">;</code></span>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-2.5">
+                <div class="relative flex-grow flex items-center bg-slate-900 rounded-xl border-2 border-slate-700 focus-within:border-excel-500 transition shadow-inner">
+                  <span class="pl-3.5 pr-2 font-serif italic font-bold text-emerald-400 text-base select-none">fx</span>
+                  <input
+                    type="text"
+                    id="formulaInput"
+                    oninput="syncFormulaBarMirror()"
+                    onkeydown="if(event.key === 'Enter') executeFormulaTest()"
+                    placeholder="Ketik formula Excel di sini, misal: =..."
+                    autocomplete="off"
+                    spellcheck="false"
+                    class="w-full bg-transparent text-white font-mono text-sm sm:text-base py-3 pr-3.5 focus:outline-none placeholder:text-slate-500"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onclick="executeFormulaTest()"
+                  class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white bg-excel-600 hover:bg-excel-700 shadow-md shadow-emerald-900/15 transition active:scale-[0.99] shrink-0"
+                >
+                  <i class="fa-solid fa-play"></i>
+                  <span>Uji & Jalankan Formula</span>
+                </button>
+              </div>
+
+              <!-- Quick Helper Chips (Symbols & Ranges only, no answers) -->
+              <div class="flex flex-wrap items-center gap-1.5 mt-2.5">
+                <span class="text-[11px] text-slate-500 mr-1">Sisipkan simbol:</span>
+                <button type="button" onclick="insertSnippet('=')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-mono text-xs font-bold text-slate-700 border border-slate-200 transition">=</button>
+                <button type="button" onclick="insertSnippet('(')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-mono text-xs font-bold text-slate-700 border border-slate-200 transition">(</button>
+                <button type="button" onclick="insertSnippet(')')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-mono text-xs font-bold text-slate-700 border border-slate-200 transition">)</button>
+                <button type="button" onclick="insertSnippet(':')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-mono text-xs font-bold text-slate-700 border border-slate-200 transition">:</button>
+                <button type="button" onclick="insertSnippet('; ')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-mono text-xs font-bold text-slate-700 border border-slate-200 transition">;</button>
+                <button type="button" onclick="insertSnippet('$')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-mono text-xs font-bold text-slate-700 border border-slate-200 transition">$</button>
+                <button type="button" onclick="insertSnippet('&quot;&quot;')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-mono text-xs font-bold text-slate-700 border border-slate-200 transition">""</button>
+                <button type="button" onclick="insertSnippet('>=')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-mono text-xs font-bold text-slate-700 border border-slate-200 transition">&gt;=</button>
+              </div>
+            </div>
+
+            <!-- Comparison Table: Prediksi Awalmu vs Hasil Aktual Excel -->
+            <div id="comparisonSection" class="hidden space-y-3 fade-in">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                  <i class="fa-solid fa-code-compare text-sky-600"></i> Perbandingan: Prediksi Awalmu vs Hasil Aktual Excel
+                </h4>
+                <span id="phase3AttemptsBadge" class="text-xs font-mono text-slate-500">Uji ke-1</span>
+              </div>
+
+              <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                  <thead>
+                    <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                      <th class="py-2.5 px-3.5 font-bold">Sel / Sampel Uji</th>
+                      <th class="py-2.5 px-3.5 font-bold">Prediksi Awalmu</th>
+                      <th class="py-2.5 px-3.5 font-bold">Hasil Aktual Rumusmu</th>
+                      <th class="py-2.5 px-3.5 font-bold">Kunci Seharusnya</th>
+                      <th class="py-2.5 px-3.5 font-bold text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="comparisonTableBody" class="divide-y divide-slate-200 bg-white">
+                    <!-- Rows injected dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Diagnostic Feedback Card -->
+            <div id="phase3DiagnosticBox" class="hidden rounded-xl p-4 text-xs sm:text-sm leading-relaxed fade-in"></div>
+
+            <!-- Next Case CTA (shown when case is solved) -->
+            <div id="nextCaseContainer" class="hidden pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 fade-in">
+              <div class="flex items-center gap-2 text-xs font-semibold text-excel-700">
+                <i class="fa-solid fa-award text-lg text-amber-500"></i>
+                <span>Kasus selesai! Skor variabel penelitian telah diperbarui secara otomatis.</span>
+              </div>
+              <button
+                type="button"
+                id="btnNextCase"
+                onclick="goToNextCase()"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 transition shadow-sm"
+              >
+                <span>Lanjut ke Kasus Berikutnya</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- ==================== MODAL 1: CONTOH FORMAT PENULISAN (SYNTAX GUIDE) ==================== -->
+  <div id="syntaxModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden fade-in">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-book-open text-emerald-400"></i>
+          <h3 class="text-base font-extrabold">Panduan Format Penulisan Rumus Excel</h3>
+        </div>
+        <button type="button" onclick="closeSyntaxModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700">
+        <p class="text-slate-600">
+          Gunakan panduan anatomi rumus umum di bawah ini (menggunakan contoh tabel ilustrasi <code class="font-mono bg-slate-100 px-1.5 py-0.5 rounded">A1:A5</code>) sebagai referensi penulisan sintaks:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 class="font-bold text-slate-900 mb-1">1. Wajib Diawali Tanda Sama Dengan</h4>
+            <p class="text-xs text-slate-600 mb-2">Semua formula di Excel selalu dimulai dengan tanda <code class="font-mono font-bold text-excel-700">=</code>.</p>
+            <code class="block bg-slate-900 text-emerald-300 font-mono text-xs p-2 rounded-lg">=SUM(A1:A5)</code>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 class="font-bold text-slate-900 mb-1">2. Pemisah Argumen (<code class="font-mono">,</code> atau <code class="font-mono">;</code>)</h4>
+            <p class="text-xs text-slate-600 mb-2">Aplikasi ini mendukung tanda koma maupun titik koma sesuai standar Indonesia.</p>
+            <code class="block bg-slate-900 text-emerald-300 font-mono text-xs p-2 rounded-lg">=IF(A1&gt;=75; "Lulus"; "Ulang")</code>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 class="font-bold text-slate-900 mb-1">3. Teks Wajib Pakai Tanda Petik</h4>
+            <p class="text-xs text-slate-600 mb-2">Kriteria atau keluaran berupa kata/teks harus diapit tanda petik ganda <code class="font-mono">"..."</code>.</p>
+            <code class="block bg-slate-900 text-emerald-300 font-mono text-xs p-2 rounded-lg">=COUNTIF(A1:A5, "Aktif")</code>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 class="font-bold text-slate-900 mb-1">4. Penguncian Sel Absolut (<code class="font-mono">$</code>)</h4>
+            <p class="text-xs text-slate-600 mb-2">Tambahkan <code class="font-mono">$</code> agar alamat sel acuan tidak bergeser saat rumus ditarik ke bawah.</p>
+            <code class="block bg-slate-900 text-emerald-300 font-mono text-xs p-2 rounded-lg">=IF(A1&gt;=$Z$1, "Ya", "Tidak")</code>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5">
+          <h4 class="font-bold text-excel-800 text-xs uppercase tracking-wider mb-1.5">Ringkasan Perbedaan Fungsi Utama:</h4>
+          <ul class="space-y-1 text-xs text-emerald-950 list-disc pl-4">
+            <li><code class="font-mono font-bold">SUM(rentang)</code>: Menjumlahkan nilai angka.</li>
+            <li><code class="font-mono font-bold">AVERAGE(rentang)</code>: Menghitung rata-rata angka (mengabaikan sel kosong, menghitung angka 0).</li>
+            <li><code class="font-mono font-bold">COUNT(rentang)</code>: Menghitung banyaknya sel yang berisi <strong>angka saja</strong>.</li>
+            <li><code class="font-mono font-bold">COUNTA(rentang)</code>: Menghitung banyaknya sel yang <strong>tidak kosong</strong> (teks maupun angka).</li>
+            <li><code class="font-mono font-bold">SUMIF(rentang_kriteria, kriteria, rentang_jumlah)</code>: Menjumlahkan angka berdasarkan syarat tertentu.</li>
+            <li><code class="font-mono font-bold">IF(uji_logika, nilai_jika_benar, nilai_jika_salah)</code>: Percabangan keputusan bersyarat.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button type="button" onclick="closeSyntaxModal()" class="px-5 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-excel-600 hover:bg-excel-700 transition">
+          Mengerti, Kembali ke Tantangan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: RAPOR & LOG KOGNITIF PENELITIAN ==================== -->
+  <div id="reportModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden fade-in">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 bg-gradient-to-r from-slate-900 to-excel-900 text-white flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Instrumen Evaluasi Pembelajaran</span>
+          <h3 class="text-base sm:text-lg font-extrabold">Rapor Capaian Variabel & Log Aktivitas Kognitif</h3>
+        </div>
+        <button type="button" onclick="closeReportModal()" class="text-slate-300 hover:text-white p-1.5 rounded-lg transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-6 text-xs sm:text-sm">
+        <!-- Student Identity Bar (Editable for live demo) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <label for="studentNameInput" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Nama Peserta Didik</label>
+            <input
+              type="text"
+              id="studentNameInput"
+              value="Siswa Uji Coba 01"
+              class="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 font-semibold text-xs sm:text-sm focus:outline-none focus:border-excel-600"
+            />
+          </div>
+          <div>
+            <label for="studentClassInput" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Kelas / Kelompok</label>
+            <input
+              type="text"
+              id="studentClassInput"
+              value="Kelas Eksperimen — Informatika"
+              class="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 font-semibold text-xs sm:text-sm focus:outline-none focus:border-excel-600"
+            />
+          </div>
+        </div>
+
+        <!-- 3 Variables Summary Grid -->
+        <div id="reportVariablesGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Per-Case Breakdown Table -->
+        <div>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-2.5 flex items-center gap-2">
+            <i class="fa-solid fa-table-list text-excel-600"></i> Rincian Performa per Studi Kasus & Trap Case
+          </h4>
+          <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                  <th class="py-2.5 px-3 font-bold">Studi Kasus & Level</th>
+                  <th class="py-2.5 px-3 font-bold">Status</th>
+                  <th class="py-2.5 px-3 font-bold text-center">Select (T1)</th>
+                  <th class="py-2.5 px-3 font-bold text-center">Predict (T2)</th>
+                  <th class="py-2.5 px-3 font-bold text-center">Test/Debug (T3)</th>
+                  <th class="py-2.5 px-3 font-bold">Formula Terakhir</th>
+                </tr>
+              </thead>
+              <tbody id="reportCaseTableBody" class="divide-y divide-slate-200">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Chronological Cognitive Log -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left text-sky-600"></i> Jejak Log Kognitif (Select → Predict → Test)
+            </h4>
+            <span id="logCountBadge" class="text-[11px] font-mono text-slate-500">0 aktivitas</span>
+          </div>
+          <div id="cognitiveLogList" class="max-h-48 overflow-y-auto bg-slate-900 text-slate-200 rounded-xl p-3.5 font-mono text-[11px] space-y-1.5">
+            <!-- Logs populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Copy Toast -->
+        <div id="copySuccessBanner" class="hidden bg-emerald-100 border border-emerald-300 text-emerald-900 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-check-circle text-excel-600"></i>
+          <span>Ringkasan rapor kognitif berhasil disalin ke clipboard!</span>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+        <button
+          type="button"
+          onclick="resetAllProgress()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
+        >
+          <i class="fa-solid fa-trash-can"></i> Reset Seluruh Sesi
+        </button>
+
+        <div class="flex items-center gap-2.5">
+          <button
+            type="button"
+            onclick="copyReportSummary()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 transition"
+          >
+            <i class="fa-solid fa-copy text-excel-600"></i> Salin Ringkasan Rapor
+          </button>
+          <button
+            type="button"
+            onclick="closeReportModal()"
+            class="px-5 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-excel-600 hover:bg-excel-700 transition"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CONFIRMATION DIALOG MODAL (NO native confirm()) ==================== -->
+  <div id="confirmDialogModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 fade-in">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-rotate-left text-lg"></i>
+        </div>
+        <div>
+          <h3 id="confirmDialogTitle" class="text-base font-extrabold text-slate-900">Konfirmasi Reset</h3>
+          <p id="confirmDialogMessage" class="text-xs text-slate-600 mt-0.5">Apakah Anda yakin?</p>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2.5 pt-2">
+        <button type="button" onclick="closeConfirmDialog()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
+          Batal
+        </button>
+        <button type="button" id="confirmDialogProceedBtn" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition">
+          Ya, Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT APPLICATION ENGINE ==================== -->
+  <script>
+    /**
+     * ============================================================================
+     * 1. DATASET STUDI KASUS BERJENJANG (NEAR TRANSFER -> FAR TRANSFER)
+     * ============================================================================
+     */
+    const CASES_DATA = [
+      {
+        id: 0,
+        code: 'Kasus 1',
+        level: 'Near Transfer',
+        levelColor: 'emerald',
+        transferWeight: 20,
+        title: 'Rekap Kas & Kehadiran Piket',
+        fileName: 'Rekap_Piket_Kelas.xlsx',
+        narrative:
+          'Sekretaris kelas mencatat daftar kehadiran piket kebersihan pada kolom C. Siswa yang bertugas piket menuliskan teks "Hadir", sedangkan siswa yang tidak hadir dibiarkan kosong.',
+        mission:
+          'Hitunglah jumlah siswa yang hadir piket pada sel target C8 menggunakan rentang data C2:C7.',
+        trapHint:
+          'Waspada Jebakan Hafalan: Banyak siswa mengira semua perintah "menghitung jumlah" selalu memakai fungsi COUNT. Perhatikan tipe data pada kolom C!',
+        cols: ['A', 'B', 'C'],
+        grid: [
+          ['No', 'Nama Siswa', 'Status Piket'],
+          [1, 'Andi Pratama', 'Hadir'],
+          [2, 'Bunga Citra', ''],
+          [3, 'Candra Wijaya', 'Hadir'],
+          [4, 'Dina Kartika', 'Hadir'],
+          [5, 'Eko Saputra', ''],
+          [6, 'Fitriani', 'Hadir'],
+          ['', 'Total Siswa Hadir', ''],
+        ],
+        targetCells: ['C8'],
+        primaryTargetCell: 'C8',
+        refCells: [],
+        expectedOutputs: { C8: 4 },
+        // Phase 1: Two-Tier Diagnostic
+        functionOptions: [
+          { name: 'SUM', desc: 'Menjumlahkan nilai angka' },
+          { name: 'AVERAGE', desc: 'Mencari rata-rata angka' },
+          { name: 'COUNT', desc: 'Mencacah sel berisi angka' },
+          { name: 'COUNTA', desc: 'Mencacah sel tidak kosong' },
+          { name: 'IF', desc: 'Uji syarat logika' },
+        ],
+        correctFunction: 'COUNTA',
+        reasonOptions: [
+          {
+            id: 'r1',
+            text: 'Karena kita ingin menjumlahkan seluruh angka yang ada pada kolom status piket.',
+            isCorrect: false,
+            hint: 'Kolom C berisi teks "Hadir", bukan bilangan yang bisa dijumlahkan secara aritmetika.',
+          },
+          {
+            id: 'r2',
+            text: 'Karena COUNT hanya menghitung sel berisi angka (hasilnya 0 pada teks), sedangkan COUNTA menghitung semua sel yang tidak kosong.',
+            isCorrect: true,
+            hint: '',
+          },
+          {
+            id: 'r3',
+            text: 'Karena fungsi COUNT otomatis menghitung baik sel angka maupun sel berisi huruf secara bersamaan.',
+            isCorrect: false,
+            hint: 'Hati-hati! Ini miskonsepsi umum: fungsi COUNT di Excel mengabaikan teks dan hanya menghitung sel numerik.',
+          },
+          {
+            id: 'r4',
+            text: 'Karena kita ingin menampilkan teks "Lulus" atau "Tidak" pada setiap baris siswa.',
+            isCorrect: false,
+            hint: 'Kita hanya membutuhkan satu angka rekap total kehadiran di sel C8, bukan label per baris.',
+          },
+        ],
+        // Phase 2: Mental Tracing Questions
+        predictions: [
+          {
+            id: 'p1',
+            label: 'Simulasi Jebakan: Jika seseorang keliru memakai =COUNT(C2:C7) pada data teks di atas, angka berapa yang muncul?',
+            type: 'select',
+            options: ['0', '4', '6', '#VALUE!'],
+            correctAnswer: '0',
+            explanation: 'COUNT hanya menghitung angka, sehingga pada sel teks "Hadir" hasilnya adalah 0.',
+          },
+          {
+            id: 'p2',
+            label: 'Prediksi Target (C8): Dengan fungsi COUNTA pada rentang C2:C7, berapa hasil akhir yang akan muncul di sel C8?',
+            type: 'number',
+            placeholder: 'Masukkan angka prediksi...',
+            correctAnswer: '4',
+            explanation: 'Terdapat 4 sel yang terisi teks "Hadir" dan 2 sel kosong.',
+          },
+        ],
+        // Phase 3: Comparison rows & Custom Diagnostics
+        comparisonSamples: [
+          { label: 'Sel C8 (Total Siswa Hadir)', cell: 'C8', predictionKey: 'p2', expected: 4 },
+        ],
+        diagnoseFormula(rawFormula, evalResults) {
+          const upper = rawFormula.toUpperCase();
+          if (upper.includes('COUNT(') && !upper.includes('COUNTA(') && !upper.includes('COUNTIF(')) {
+            return {
+              type: 'trap',
+              title: 'Jebakan Konseptual Terdeteksi: COUNT vs COUNTA!',
+              message:
+                'Rumusmu memakai <code>COUNT</code> yang hanya menghitung sel berisi <b>angka</b>. Karena sel <code>C2:C7</code> berisi teks <code>"Hadir"</code>, Excel menghasilkan <b>0</b>. Ganti dengan <code>COUNTA(C2:C7)</code> untuk menghitung sel yang tidak kosong!',
+            };
+          }
+          if (upper.includes('SUM(')) {
+            return {
+              type: 'logic',
+              title: 'Fungsi Kurang Tepat: SUM Hanya untuk Angka',
+              message:
+                '<code>SUM</code> berfungsi menjumlahkan nilai numerik, bukan mencacah berapa banyak sel teks yang terisi. Gunakan <code>COUNTA(C2:C7)</code>.',
+            };
+          }
+          if (!upper.includes('C2:C7')) {
+            return {
+              type: 'range',
+              title: 'Periksa Rentang Data (Range)',
+              message:
+                'Pastikan rentang sel yang kamu masukkan mencakup seluruh data status piket siswa mulai dari <code>C2</code> hingga <code>C7</code> (<code>C2:C7</code>).',
+            };
+          }
+          return null;
+        },
+      },
+
+      {
+        id: 1,
+        code: 'Kasus 2',
+        level: 'Near-Moderate Transfer',
+        levelColor: 'teal',
+        transferWeight: 25,
+        title: 'Analisis Rata-Rata Nilai Kuis',
+        fileName: 'Nilai_Kuis_Informatika.xlsx',
+        narrative:
+          'Guru merekap nilai kuis 5 siswa pada kolom C. Dodi hadir mengikuti kuis namun mendapat nilai 0, sedangkan Eka sedang sakit sehingga sel nilainya dibiarkan kosong.',
+        mission:
+          'Hitunglah rata-rata nilai kuis kelas tersebut pada sel target C7 menggunakan rentang C2:C6.',
+        trapHint:
+          'Waspada Jebakan Nol vs Sel Kosong: Bagaimana Excel memperlakukan angka 0 milik Dodi dibandingkan sel kosong milik Eka saat menghitung rata-rata?',
+        cols: ['A', 'B', 'C', 'D'],
+        grid: [
+          ['No', 'Nama Siswa', 'Nilai Kuis', 'Keterangan'],
+          [1, 'Ayu', 80, 'Hadir'],
+          [2, 'Bagas', 100, 'Hadir'],
+          [3, 'Citra', 60, 'Hadir'],
+          [4, 'Dodi', 0, 'Hadir (Nilai 0)'],
+          [5, 'Eka', '', 'Sakit (Belum Ujian)'],
+          ['', 'Rata-Rata Kelas', '', ''],
+        ],
+        targetCells: ['C7'],
+        primaryTargetCell: 'C7',
+        refCells: [],
+        expectedOutputs: { C7: 60 },
+        functionOptions: [
+          { name: 'SUM', desc: 'Menjumlahkan nilai angka' },
+          { name: 'AVERAGE', desc: 'Menghitung nilai rata-rata' },
+          { name: 'COUNT', desc: 'Mencacah sel berisi angka' },
+          { name: 'COUNTA', desc: 'Mencacah sel tidak kosong' },
+          { name: 'SUMIF', desc: 'Menjumlahkan dengan syarat' },
+        ],
+        correctFunction: 'AVERAGE',
+        reasonOptions: [
+          {
+            id: 'r1',
+            text: 'Karena AVERAGE membagi total nilai dengan seluruh 5 baris siswa termasuk Eka yang selnya masih kosong.',
+            isCorrect: false,
+            hint: 'Salah satu sifat penting AVERAGE di Excel adalah mengabaikan sel kosong agar siswa yang belum ujian tidak menurunkan rata-rata.',
+          },
+          {
+            id: 'r2',
+            text: 'Karena AVERAGE mencari nilai rata-rata dengan otomatis mengabaikan sel kosong (Eka), namun tetap menghitung angka 0 (Dodi) sebagai pembagi.',
+            isCorrect: true,
+            hint: '',
+          },
+          {
+            id: 'r3',
+            text: 'Karena AVERAGE mengabaikan baik sel kosong maupun sel yang bernilai angka 0.',
+            isCorrect: false,
+            hint: 'Angka 0 adalah nilai numerik yang sah! Dodi sudah mengikuti ujian sehingga angka 0 tetap dihitung sebagai pembagi.',
+          },
+          {
+            id: 'r4',
+            text: 'Karena kita hanya ingin menjumlahkan nilai siswa yang mendapat skor di atas 60.',
+            isCorrect: false,
+            hint: 'Soal meminta rata-rata seluruh nilai kuis yang sudah masuk pada C2:C6.',
+          },
+        ],
+        predictions: [
+          {
+            id: 'p1',
+            label: 'Tracing Pembagi: Berapa banyak sel pada C2:C6 yang akan dijadikan angka pembagi oleh fungsi AVERAGE?',
+            type: 'select',
+            options: ['3', '4', '5'],
+            correctAnswer: '4',
+            explanation: 'Ada 4 sel berisi angka (80, 100, 60, dan 0). Sel kosong milik Eka diabaikan oleh AVERAGE.',
+          },
+          {
+            id: 'p2',
+            label: 'Prediksi Target (C7): Total nilai = 240. Berapa hasil rata-rata nilai kuis yang akan muncul di sel C7?',
+            type: 'number',
+            placeholder: 'Masukkan angka prediksi...',
+            correctAnswer: '60',
+            explanation: '240 dibagi 4 siswa yang sudah mengikuti kuis = 60.',
+          },
+        ],
+        comparisonSamples: [
+          { label: 'Sel C7 (Rata-Rata Nilai Kuis)', cell: 'C7', predictionKey: 'p2', expected: 60 },
+        ],
+        diagnoseFormula(rawFormula, evalResults) {
+          const upper = rawFormula.toUpperCase();
+          if (evalResults.C7 === 48 || upper.includes('/5')) {
+            return {
+              type: 'trap',
+              title: 'Jebakan Sel Kosong Terdeteksi!',
+              message:
+                'Hasil <b>48</b> terjadi karena total 240 dibagi 5 siswa (ikut menghitung Eka yang belum ujian). Gunakan <code>=AVERAGE(C2:C6)</code> agar Excel otomatis mengabaikan sel kosong!',
+            };
+          }
+          if (upper.includes('C2:C5')) {
+            return {
+              type: 'range',
+              title: 'Rentang Belum Mencakup Semua Siswa',
+              message:
+                'Sertakan hingga baris ke-6 (<code>C2:C6</code>) agar rumus tetap dinamis apabila nilai susulan Eka kelak diinput ke sel <code>C6</code>.',
+            };
+          }
+          return null;
+        },
+      },
+
+      {
+        id: 2,
+        code: 'Kasus 3',
+        level: 'Moderate Transfer',
+        levelColor: 'amber',
+        transferWeight: 25,
+        title: 'Laporan Dana Kegiatan OSIS',
+        fileName: 'Kas_Kegiatan_OSIS.xlsx',
+        narrative:
+          'Bendahara OSIS mencatat semua pengeluaran kegiatan dalam satu tabel campuran berdasarkan kategori ("Konsumsi", "Publikasi", "Perlengkapan"). Struktur tabel ini berbeda dari contoh biasa yang menjumlahkan seluruh kolom.',
+        mission:
+          'Hitunglah TOTAL BIAYA khusus untuk kategori "Konsumsi" pada sel target D8!',
+        trapHint:
+          'Waspada Jebakan Agregasi: Jangan menjumlahkan semua kategori (SUM), dan jangan pula hanya menghitung banyaknya transaksi (COUNTIF)!',
+        cols: ['A', 'B', 'C', 'D'],
+        grid: [
+          ['Tanggal', 'Uraian Belanja', 'Kategori', 'Biaya (Rp)'],
+          ['10/11', 'Nasi Kotak Panitia', 'Konsumsi', 250000],
+          ['10/11', 'Spanduk & Poster', 'Publikasi', 150000],
+          ['11/11', 'Air Mineral Dus', 'Konsumsi', 100000],
+          ['11/11', 'Sewa Sound System', 'Perlengkapan', 400000],
+          ['12/11', 'Snack Tamu Undangan', 'Konsumsi', 150000],
+          ['12/11', 'Kertas Sertifikat', 'Perlengkapan', 50000],
+          ['', '', 'Total Konsumsi', ''],
+        ],
+        targetCells: ['D8'],
+        primaryTargetCell: 'D8',
+        refCells: [],
+        expectedOutputs: { D8: 500000 },
+        functionOptions: [
+          { name: 'SUM', desc: 'Menjumlahkan semua angka' },
+          { name: 'COUNTIF', desc: 'Mencacah frekuensi syarat' },
+          { name: 'SUMIF', desc: 'Menjumlahkan bersyarat' },
+          { name: 'AVERAGE', desc: 'Mencari nilai rata-rata' },
+          { name: 'IF', desc: 'Uji logika tunggal' },
+        ],
+        correctFunction: 'SUMIF',
+        reasonOptions: [
+          {
+            id: 'r1',
+            text: 'Karena kita ingin menjumlahkan seluruh pengeluaran OSIS dari baris 2 sampai baris 7.',
+            isCorrect: false,
+            hint: 'Misi hanya meminta total biaya khusus kategori "Konsumsi", bukan seluruh kategori pengeluaran.',
+          },
+          {
+            id: 'r2',
+            text: 'Karena kita ingin menghitung berapa kali kata "Konsumsi" muncul di dalam daftar belanja.',
+            isCorrect: false,
+            hint: 'Menghitung frekuensi kemunculan adalah tugas COUNTIF. Kita membutuhkan total nominal rupiahnya!',
+          },
+          {
+            id: 'r3',
+            text: 'Karena kita perlu menjumlahkan nominal biaya pada kolom D HANYA untuk baris yang memenuhi kriteria "Konsumsi" di kolom C.',
+            isCorrect: true,
+            hint: '',
+          },
+          {
+            id: 'r4',
+            text: 'Karena fungsi IF dapat langsung menyaring dan menjumlahkan satu kolom secara otomatis.',
+            isCorrect: false,
+            hint: 'Untuk menjumlahkan rentang berdasarkan syarat kategori, Excel menyediakan fungsi khusus SUMIF.',
+          },
+        ],
+        predictions: [
+          {
+            id: 'p1',
+            label: 'Tracing Kriteria: Ada berapa baris belanja yang termasuk kategori "Konsumsi" pada tabel?',
+            type: 'select',
+            options: ['2', '3', '6'],
+            correctAnswer: '3',
+            explanation: 'Nasi Kotak (250.000), Air Mineral (100.000), dan Snack Tamu (150.000) -> 3 baris.',
+          },
+          {
+            id: 'p2',
+            label: 'Prediksi Target (D8): Berapa total biaya kategori "Konsumsi" (ketik angka saja tanpa titik, misal: 300000)?',
+            type: 'number',
+            placeholder: 'Contoh: 300000',
+            correctAnswer: '500000',
+            explanation: '250.000 + 100.000 + 150.000 = 500.000.',
+          },
+        ],
+        comparisonSamples: [
+          { label: 'Sel D8 (Total Biaya Konsumsi)', cell: 'D8', predictionKey: 'p2', expected: 500000 },
+        ],
+        diagnoseFormula(rawFormula, evalResults) {
+          const upper = rawFormula.toUpperCase();
+          if (upper.includes('SUM(') && !upper.includes('SUMIF(')) {
+            return {
+              type: 'trap',
+              title: 'Jebakan Terdeteksi: SUM Menjumlahkan Semua Kategori!',
+              message:
+                'Rumus <code>SUM</code> menjumlahkan seluruh pengeluaran termasuk Perlengkapan & Publikasi (1.100.000). Gunakan <code>=SUMIF(C2:C7, "Konsumsi", D2:D7)</code>!',
+            };
+          }
+          if (upper.includes('COUNTIF(')) {
+            return {
+              type: 'trap',
+              title: 'Jebakan Terdeteksi: COUNTIF Hanya Menghitung Frekuensi!',
+              message:
+                '<code>COUNTIF</code> hanya menghitung ada <b>3</b> transaksi Konsumsi, bukan menjumlahkan nominal rupiahnya (<b>500000</b>). Gunakan <code>SUMIF</code> dengan 3 argumen!',
+            };
+          }
+          if (upper.includes('SUMIF(') && upper.indexOf('D2:D7') < upper.indexOf('C2:C7')) {
+            return {
+              type: 'syntax',
+              title: 'Urutan Argumen SUMIF Terbalik!',
+              message:
+                'Susunan <code>SUMIF</code> adalah: <code>=SUMIF(rentang_kriteria, "kriteria", rentang_angka_dijumlahkan)</code>. Letakkan <code>C2:C7</code> di depan dan <code>D2:D7</code> di akhir.',
+            };
+          }
+          return null;
+        },
+      },
+
+      {
+        id: 3,
+        code: 'Kasus 4',
+        level: 'Far Transfer',
+        levelColor: 'rose',
+        transferWeight: 30,
+        title: 'Penentuan Bonus & Target Sales (Autofill)',
+        fileName: 'Evaluasi_Bonus_Sales.xlsx',
+        narrative:
+          'Manajer toko ingin menentukan status bonus karyawan pada kolom D (D2:D5). Syarat mendapat "Bonus" adalah jika unit terjual MINIMAL SAMA DENGAN target acuan di sel terpisah F2 (100 unit). Jika kurang, statusnya "Belum". Rumus di D2 akan ditarik otomatis (autofill) hingga D5!',
+        mission:
+          'Tulis formula pada sel D2 yang tetap akurat saat disalin/ditarik otomatis (autofill) ke D3, D4, dan D5!',
+        trapHint:
+          'Jebakan Ganda (Far Transfer): (1) Jika lupa mengunci sel target $F$2, referensi akan bergeser saat ditarik ke bawah! (2) Perhatikan Sinta yang terjual tepat 100 unit (batas >= vs >).',
+        cols: ['A', 'B', 'C', 'D', 'E', 'F'],
+        grid: [
+          ['ID', 'Nama Sales', 'Terjual', 'Status Bonus', '', 'Target Min.'],
+          ['S01', 'Raka', 120, '', '', 100],
+          ['S02', 'Sinta', 100, '', '', ''],
+          ['S03', 'Tari', 85, '', '', ''],
+          ['S04', 'Umar', 105, '', '', ''],
+        ],
+        targetCells: ['D2', 'D3', 'D4', 'D5'],
+        primaryTargetCell: 'D2',
+        refCells: ['F2'],
+        expectedOutputs: {
+          D2: 'Bonus',
+          D3: 'Bonus',
+          D4: 'Belum',
+          D5: 'Bonus',
+        },
+        functionOptions: [
+          { name: 'SUMIF', desc: 'Menjumlahkan bersyarat' },
+          { name: 'COUNTIF', desc: 'Mencacah bersyarat' },
+          { name: 'IF', desc: 'Percabangan logika bersyarat' },
+          { name: 'AVERAGE', desc: 'Mencari rata-rata' },
+          { name: 'COUNTA', desc: 'Mencacah sel terisi' },
+        ],
+        correctFunction: 'IF',
+        reasonOptions: [
+          {
+            id: 'r1',
+            text: 'Karena kita mengevaluasi syarat logika (>= target) per baris dan wajib mengunci sel acuan target ($F$2) agar tidak bergeser saat ditarik ke bawah.',
+            isCorrect: true,
+            hint: '',
+          },
+          {
+            id: 'r2',
+            text: 'Karena kita cukup menulis =IF(C2>F2, "Bonus", "Belum") tanpa tanda $, dan Excel otomatis menjaga sel F2 tetap diam.',
+            isCorrect: false,
+            hint: 'Tanpa tanda dolar ($), saat rumus ditarik dari D2 ke D4, F2 akan ikut bergeser menjadi F4 (sel kosong bernilai 0)!',
+          },
+          {
+            id: 'r3',
+            text: 'Karena kita ingin menjumlahkan seluruh unit terjual dari Raka sampai Umar.',
+            isCorrect: false,
+            hint: 'Kolom D meminta keputusan teks ("Bonus" atau "Belum") untuk masing-masing karyawan.',
+          },
+          {
+            id: 'r4',
+            text: 'Karena kita hanya menghitung berapa orang sales yang menjual lebih dari 100 unit.',
+            isCorrect: false,
+            hint: 'Kita perlu melabeli setiap baris sales pada kolom D, bukan sekadar menghitung jumlah orangnya.',
+          },
+        ],
+        predictions: [
+          {
+            id: 'p1',
+            label: 'Prediksi Raka (Sel D2 — Terjual 120 unit, Target 100):',
+            type: 'select',
+            options: ['Bonus', 'Belum'],
+            correctAnswer: 'Bonus',
+            explanation: '120 >= 100 memenuhi syarat target -> "Bonus".',
+          },
+          {
+            id: 'p2',
+            label: 'Prediksi Sinta (Sel D3 — Terjual tepat 100 unit [Nilai Batas!], Target 100):',
+            type: 'select',
+            options: ['Bonus', 'Belum'],
+            correctAnswer: 'Bonus',
+            explanation: 'Syarat adalah "minimal sama dengan target" (>= 100), sehingga 100 tetap mendapat "Bonus".',
+          },
+          {
+            id: 'p3',
+            label: 'Prediksi Tari (Sel D4 — Terjual 85 unit, Target 100):',
+            type: 'select',
+            options: ['Bonus', 'Belum'],
+            correctAnswer: 'Belum',
+            explanation: '85 < 100 belum mencapai target -> "Belum".',
+          },
+        ],
+        comparisonSamples: [
+          { label: 'D2 — Raka (120 unit)', cell: 'D2', predictionKey: 'p1', expected: 'Bonus' },
+          { label: 'D3 — Sinta (100 unit)', cell: 'D3', predictionKey: 'p2', expected: 'Bonus' },
+          { label: 'D4 — Tari (85 unit)', cell: 'D4', predictionKey: 'p3', expected: 'Belum' },
+          { label: 'D5 — Umar (105 unit)', cell: 'D5', predictionKey: null, expected: 'Bonus' },
+        ],
+        diagnoseFormula(rawFormula, evalResults) {
+          const upper = rawFormula.toUpperCase();
+          // Detect relative F2 without $ lock
+          if (upper.includes('F2') && !upper.includes('$2')) {
+            return {
+              type: 'trap',
+              title: 'Jebakan Referensi Relatif Terdeteksi! Lupa Mengunci $F$2',
+              message:
+                'Lihat hasil pada <b>D4 (Tari - 85 unit)</b>: rumusmu menghasilkan <code>"Bonus"</code>! Mengapa? Karena tanpa tanda <code>$</code>, saat rumus ditarik dari <code>D2</code> ke <code>D4</code>, acuan <code>F2</code> bergeser menjadi <code>F4</code> (sel kosong = 0), sehingga <code>85 >= 0</code> dianggap benar. Kunci sel acuan menjadi <code>$F$2</code>!',
+            };
+          }
+          // Detect > instead of >= boundary trap
+          if (upper.includes('>') && !upper.includes('>=') && !upper.includes('<>')) {
+            return {
+              type: 'trap',
+              title: 'Jebakan Nilai Batas (Boundary Trap): Operator > vs >=',
+              message:
+                'Lihat hasil pada <b>D3 (Sinta - 100 unit)</b>: rumusmu menghasilkan <code>"Belum"</code> padahal target minimal adalah 100! Gunakan operator <code>&gt;=</code> (lebih besar atau sama dengan) agar nilai tepat 100 tetap mendapat <code>"Bonus"</code>.',
+            };
+          }
+          return null;
+        },
+      },
+    ];
+
+    /**
+     * ============================================================================
+     * 2. APPLICATION STATE & COGNITIVE METRICS TRACKER
+     * ============================================================================
+     */
+    let currentCaseIdx = 0;
+    let selectedCellCoord = 'C8';
+    let pendingConfirmAction = null;
+
+    // State per case
+    const caseStates = CASES_DATA.map((c) => ({
+      selectedFunc: null,
+      selectedReasonId: null,
+      phase1Attempts: 0,
+      phase1Passed: false,
+      predictions: {},
+      phase2Locked: false,
+      predictionAccuracy: 0, // 0..1
+      phase3Attempts: 0,
+      lastFormula: '',
+      evaluatedCells: {},
+      completed: false,
+      trapsHit: [],
+    }));
+
+    // Chronological activity log for Research Report
+    const cognitiveLogs = [];
+
+    function logActivity(phase, caseCode, detail, status = 'info') {
+      const now = new Date();
+      const timeStr = now.toTimeString().slice(0, 8);
+      cognitiveLogs.unshift({
+        time: timeStr,
+        phase,
+        caseCode,
+        detail,
+        status,
+      });
+    }
+
+    /**
+     * ============================================================================
+     * 3. BUILT-IN JAVASCRIPT EXCEL FORMULA EVALUATOR ENGINE
+     * ============================================================================
+     */
+    function colLetterToIndex(colStr) {
+      let idx = 0;
+      const clean = colStr.replace(/\$/g, '').toUpperCase();
+      for (let i = 0; i < clean.length; i++) {
+        idx = idx * 26 + (clean.charCodeAt(i) - 64);
+      }
+      return idx - 1;
+    }
+
+    function parseCellCoord(coordStr) {
+      const match = coordStr.trim().match(/^(\$?)([A-Za-z]+)(\$?)(\d+)$/);
+      if (!match) return null;
+      return {
+        colLocked: match[1] === '$',
+        colStr: match[2].toUpperCase(),
+        colIdx: colLetterToIndex(match[2]),
+        rowLocked: match[3] === '$',
+        rowNum: parseInt(match[4], 10),
+        rowIdx: parseInt(match[4], 10) - 1,
+      };
+    }
+
+    function getCellValue(grid, coordStr) {
+      const parsed = parseCellCoord(coordStr);
+      if (!parsed) return '#REF!';
+      if (parsed.rowIdx < 0 || parsed.rowIdx >= grid.length) return '';
+      const row = grid[parsed.rowIdx];
+      if (!row || parsed.colIdx < 0 || parsed.colIdx >= row.length) return '';
+      return row[parsed.colIdx];
+    }
+
+    function expandRange(grid, rangeStr) {
+      const parts = rangeStr.split(':');
+      if (parts.length !== 2) return null;
+      const start = parseCellCoord(parts[0]);
+      const end = parseCellCoord(parts[1]);
+      if (!start || !end) return null;
+
+      const rMin = Math.min(start.rowIdx, end.rowIdx);
+      const rMax = Math.max(start.rowIdx, end.rowIdx);
+      const cMin = Math.min(start.colIdx, end.colIdx);
+      const cMax = Math.max(start.colIdx, end.colIdx);
+
+      const values = [];
+      for (let r = rMin; r <= rMax; r++) {
+        for (let c = cMin; c <= cMax; c++) {
+          const val = grid[r] && grid[r][c] !== undefined ? grid[r][c] : '';
+          values.push(val);
+        }
+      }
+      return values;
+    }
+
+    /**
+     * Simulates Excel Autofill row shifting (respecting $ absolute row locks)
+     */
+    function shiftFormulaRows(formula, rowDelta) {
+      if (rowDelta === 0) return formula;
+      // Replace cell references outside double quotes
+      let inQuotes = false;
+      let result = '';
+      let buffer = '';
+
+      for (let i = 0; i < formula.length; i++) {
+        const ch = formula[i];
+        if (ch === '"') {
+          if (!inQuotes) {
+            // Flush non-quoted buffer
+            result += shiftRefsInSegment(buffer, rowDelta);
+            buffer = '';
+            inQuotes = true;
+            result += ch;
+          } else {
+            inQuotes = false;
+            result += ch;
+          }
+        } else if (inQuotes) {
+          result += ch;
+        } else {
+          buffer += ch;
+        }
+      }
+      if (buffer) {
+        result += shiftRefsInSegment(buffer, rowDelta);
+      }
+      return result;
+    }
+
+    function shiftRefsInSegment(segment, rowDelta) {
+      return segment.replace(/(\$?)([A-Za-z]{1,2})(\$?)(\d+)/g, (match, cLock, col, rLock, rowStr) => {
+        if (rLock === '$') {
+          return `${cLock}${col}$${rowStr}`;
+        }
+        const newRow = parseInt(rowStr, 10) + rowDelta;
+        return `${cLock}${col}${newRow}`;
+      });
+    }
+
+    /**
+     * Splits function arguments by top-level ',' or ';' ignoring quotes & nested parens
+     */
+    function splitTopLevelArgs(argString) {
+      const args = [];
+      let current = '';
+      let depth = 0;
+      let inQuotes = false;
+
+      for (let i = 0; i < argString.length; i++) {
+        const ch = argString[i];
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+          current += ch;
+        } else if (!inQuotes) {
+          if (ch === '(') {
+            depth++;
+            current += ch;
+          } else if (ch === ')') {
+            depth--;
+            current += ch;
+          } else if ((ch === ',' || ch === ';') && depth === 0) {
+            args.push(current.trim());
+            current = '';
+          } else {
+            current += ch;
+          }
+        } else {
+          current += ch;
+        }
+      }
+      if (current.trim() !== '' || args.length > 0) {
+        args.push(current.trim());
+      }
+      return args.filter((a) => a !== '');
+    }
+
+    function evaluateSingleValue(expr, grid) {
+      const trimmed = expr.trim();
+      if (trimmed === '') return '';
+
+      // Quoted string literal
+      if (trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length >= 2) {
+        return trimmed.slice(1, -1);
+      }
+
+      // Numeric literal
+      if (!isNaN(Number(trimmed))) {
+        return Number(trimmed);
+      }
+
+      // Nested function call
+      if (/^[A-Za-z]+\s*\(.*\)$/.test(trimmed)) {
+        return evaluateExpression(trimmed, grid);
+      }
+
+      // Cell reference
+      if (/^\$?[A-Za-z]+\$?\d+$/.test(trimmed)) {
+        const val = getCellValue(grid, trimmed);
+        return val === '' ? 0 : val; // In arithmetic/comparisons, empty cell evaluates as 0 in Excel
+      }
+
+      return trimmed;
+    }
+
+    function matchesCriteria(cellVal, rawCriteria) {
+      let crit = rawCriteria.trim();
+      if (crit.startsWith('"') && crit.endsWith('"')) {
+        crit = crit.slice(1, -1);
+      }
+
+      // Check operator prefix in criteria (e.g., ">=10", "<100")
+      const opMatch = crit.match(/^(>=|<=|<>|!=|>|<|=)(.*)$/);
+      if (opMatch) {
+        const op = opMatch[1];
+        const rhsRaw = opMatch[2].trim();
+        const rhsNum = Number(rhsRaw);
+        const lhsNum = cellVal === '' ? 0 : Number(cellVal);
+
+        if (!isNaN(rhsNum) && !isNaN(lhsNum)) {
+          if (op === '>=') return lhsNum >= rhsNum;
+          if (op === '<=') return lhsNum <= rhsNum;
+          if (op === '>') return lhsNum > rhsNum;
+          if (op === '<') return lhsNum < rhsNum;
+          if (op === '=') return lhsNum === rhsNum;
+          if (op === '<>' || op === '!=') return lhsNum !== rhsNum;
+        }
+      }
+
+      // Exact match (case-insensitive for strings)
+      if (typeof cellVal === 'string') {
+        return cellVal.toLowerCase() === crit.toLowerCase();
+      }
+      if (!isNaN(Number(crit)) && crit !== '') {
+        return Number(cellVal) === Number(crit);
+      }
+      return String(cellVal).toLowerCase() === crit.toLowerCase();
+    }
+
+    function evaluateLogicalTest(testExpr, grid) {
+      // Find comparison operator outside quotes
+      let inQuotes = false;
+      let opIndex = -1;
+      let opFound = '';
+
+      const operators = ['>=', '<=', '<>', '!=', '=', '>', '<'];
+      for (let i = 0; i < testExpr.length; i++) {
+        if (testExpr[i] === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        if (!inQuotes) {
+          for (const op of operators) {
+            if (testExpr.slice(i, i + op.length) === op) {
+              opIndex = i;
+              opFound = op;
+              break;
+            }
+          }
+          if (opIndex !== -1) break;
+        }
+      }
+
+      if (opIndex === -1) {
+        const val = evaluateSingleValue(testExpr, grid);
+        return Boolean(val);
+      }
+
+      const lhsExpr = testExpr.slice(0, opIndex).trim();
+      const rhsExpr = testExpr.slice(opIndex + opFound.length).trim();
+
+      const lhs = evaluateSingleValue(lhsExpr, grid);
+      const rhs = evaluateSingleValue(rhsExpr, grid);
+
+      const bothNumeric = typeof lhs === 'number' && typeof rhs === 'number';
+      if (bothNumeric) {
+        switch (opFound) {
+          case '>=': return lhs >= rhs;
+          case '<=': return lhs <= rhs;
+          case '>': return lhs > rhs;
+          case '<': return lhs < rhs;
+          case '=': return lhs === rhs;
+          case '<>':
+          case '!=': return lhs !== rhs;
+        }
+      } else {
+        const lStr = String(lhs).toLowerCase();
+        const rStr = String(rhs).toLowerCase();
+        switch (opFound) {
+          case '=': return lStr === rStr;
+          case '<>':
+          case '!=': return lStr !== rStr;
+          case '>=': return lStr >= rStr;
+          case '<=': return lStr <= rStr;
+          case '>': return lStr > rStr;
+          case '<': return lStr < rStr;
+        }
+      }
+      return false;
+    }
+
+    function collectValuesFromArgs(args, grid) {
+      const items = [];
+      for (const arg of args) {
+        if (arg.includes(':')) {
+          const expanded = expandRange(grid, arg);
+          if (!expanded) throw new Error('#REF!');
+          items.push(...expanded);
+        } else if (/^\$?[A-Za-z]+\$?\d+$/.test(arg)) {
+          items.push(getCellValue(grid, arg));
+        } else {
+          items.push(evaluateSingleValue(arg, grid));
+        }
+      }
+      return items;
+    }
+
+    function evaluateExpression(expr, grid) {
+      const trimmed = expr.trim();
+
+      // Check basic arithmetic division like =SUM(C2:C6)/5
+      const divMatch = trimmed.match(/^([A-Za-z]+\s*\([^()]*\))\s*\/\s*(\d+(?:\.\d+)?)$/);
+      if (divMatch) {
+        const num = evaluateExpression(divMatch[1], grid);
+        const den = Number(divMatch[2]);
+        if (den === 0) return '#DIV/0!';
+        if (typeof num === 'number') return Number((num / den).toFixed(4));
+      }
+
+      const fnMatch = trimmed.match(/^([A-Za-z]+)\s*\((.*)\)$/);
+      if (!fnMatch) {
+        return evaluateSingleValue(trimmed, grid);
+      }
+
+      const fnName = fnMatch[1].toUpperCase();
+      const args = splitTopLevelArgs(fnMatch[2]);
+
+      switch (fnName) {
+        case 'SUM': {
+          const vals = collectValuesFromArgs(args, grid);
+          return vals.reduce((acc, v) => (typeof v === 'number' ? acc + v : acc), 0);
+        }
+        case 'AVERAGE': {
+          const vals = collectValuesFromArgs(args, grid);
+          const nums = vals.filter((v) => typeof v === 'number');
+          if (nums.length === 0) return '#DIV/0!';
+          const sum = nums.reduce((a, b) => a + b, 0);
+          return Number((sum / nums.length).toFixed(4));
+        }
+        case 'COUNT': {
+          const vals = collectValuesFromArgs(args, grid);
+          return vals.filter((v) => typeof v === 'number').length;
+        }
+        case 'COUNTA': {
+          const vals = collectValuesFromArgs(args, grid);
+          return vals.filter((v) => v !== '' && v !== null && v !== undefined).length;
+        }
+        case 'MIN': {
+          const vals = collectValuesFromArgs(args, grid).filter((v) => typeof v === 'number');
+          return vals.length ? Math.min(...vals) : 0;
+        }
+        case 'MAX': {
+          const vals = collectValuesFromArgs(args, grid).filter((v) => typeof v === 'number');
+          return vals.length ? Math.max(...vals) : 0;
+        }
+        case 'COUNTIF': {
+          if (args.length < 2) return '#VALUE!';
+          const rangeVals = expandRange(grid, args[0]);
+          if (!rangeVals) return '#REF!';
+          return rangeVals.filter((v) => matchesCriteria(v, args[1])).length;
+        }
+        case 'SUMIF': {
+          if (args.length < 2) return '#VALUE!';
+          const critVals = expandRange(grid, args[0]);
+          if (!critVals) return '#REF!';
+          const sumVals = args[2] ? expandRange(grid, args[2]) : critVals;
+          if (!sumVals) return '#REF!';
+
+          let total = 0;
+          const len = Math.min(critVals.length, sumVals.length);
+          for (let i = 0; i < len; i++) {
+            if (matchesCriteria(critVals[i], args[1]) && typeof sumVals[i] === 'number') {
+              total += sumVals[i];
+            }
+          }
+          return total;
+        }
+        case 'IF': {
+          if (args.length < 2) return '#VALUE!';
+          const cond = evaluateLogicalTest(args[0], grid);
+          if (cond) {
+            return evaluateSingleValue(args[1], grid);
+          } else {
+            return args[2] !== undefined ? evaluateSingleValue(args[2], grid) : false;
+          }
+        }
+        default:
+          return '#NAME?';
+      }
+    }
+
+    function runExcelFormula(rawInput, grid, rowDelta = 0) {
+      const clean = rawInput.trim();
+      if (!clean.startsWith('=')) {
+        return { error: 'MISSING_EQUALS', value: clean };
+      }
+
+      // Check balanced parentheses
+      let balance = 0;
+      let inQuotes = false;
+      for (const ch of clean) {
+        if (ch === '"') inQuotes = !inQuotes;
+        if (!inQuotes) {
+          if (ch === '(') balance++;
+          if (ch === ')') balance--;
+        }
+      }
+      if (balance !== 0) {
+        return { error: 'PAREN_MISMATCH', value: '#ERROR!' };
+      }
+
+      try {
+        const shifted = shiftFormulaRows(clean.slice(1), rowDelta);
+        const result = evaluateExpression(shifted, grid);
+        if (typeof result === 'string' && result.startsWith('#')) {
+          return { error: result, value: result, shiftedFormula: '=' + shifted };
+        }
+        return { error: null, value: result, shiftedFormula: '=' + shifted };
+      } catch (err) {
+        return { error: err.message || '#ERROR!', value: '#ERROR!' };
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 4. UI RENDERING & INTERACTION CONTROLLERS
+     * ============================================================================
+     */
+    function initApp() {
+      renderCaseTabs();
+      loadCase(0);
+      updateResearchMetrics();
+    }
+
+    function renderCaseTabs() {
+      const container = document.getElementById('caseTabsContainer');
+      container.innerHTML = CASES_DATA.map((c, idx) => {
+        const st = caseStates[idx];
+        const isActive = idx === currentCaseIdx;
+
+        const levelBadges = {
+          emerald: 'bg-emerald-100 text-emerald-800',
+          teal: 'bg-teal-100 text-teal-800',
+          amber: 'bg-amber-100 text-amber-800',
+          rose: 'bg-rose-100 text-rose-800',
+        };
+
+        return `
+          <button
+            type="button"
+            onclick="loadCase(${idx})"
+            class="text-left p-3 rounded-xl border transition-all flex flex-col justify-between ${
+              isActive
+                ? 'bg-white border-excel-600 ring-2 ring-excel-600/20 shadow-sm'
+                : 'bg-white/70 hover:bg-white border-slate-200'
+            }"
+          >
+            <div class="flex items-center justify-between gap-1.5 mb-1.5">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${levelBadges[c.levelColor]}">
+                ${c.level}
+              </span>
+              ${
+                st.completed
+                  ? '<span class="inline-flex items-center gap-1 text-[11px] font-bold text-excel-600"><i class="fa-solid fa-circle-check"></i> Selesai</span>'
+                  : isActive
+                  ? '<span class="text-[11px] font-bold text-amber-600">Aktif</span>'
+                  : '<span class="text-[11px] text-slate-400">Belum</span>'
+              }
+            </div>
+            <div class="text-xs font-extrabold text-slate-800 line-clamp-1">
+              ${c.code}: ${c.title}
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function loadCase(idx) {
+      currentCaseIdx = idx;
+      const c = CASES_DATA[idx];
+      const st = caseStates[idx];
+      selectedCellCoord = c.primaryTargetCell;
+
+      renderCaseTabs();
+
+      // Update Left Column Narrative
+      document.getElementById('caseLevelBadge').textContent = `Level: ${c.level}`;
+      document.getElementById('caseTitle').textContent = `${c.code}: ${c.title}`;
+      document.getElementById('caseNarrative').textContent = c.narrative;
+      document.getElementById('caseMission').textContent = c.mission;
+      document.getElementById('caseTrapHint').innerHTML = `<strong>Perhatian:</strong> ${c.trapHint}`;
+      document.getElementById('sheetFileName').textContent = c.fileName;
+
+      const statusPill = document.getElementById('caseStatusPill');
+      if (st.completed) {
+        statusPill.className = 'shrink-0 px-3 py-1 rounded-full text-xs font-bold bg-white text-excel-700 shadow-xs';
+        statusPill.innerHTML = '<i class="fa-solid fa-check-circle mr-1"></i> Tuntas';
+      } else {
+        statusPill.className = 'shrink-0 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-100 border border-amber-300/30';
+        statusPill.textContent = 'Sedang Dikerjakan';
+      }
+
+      // Show reference legend if case has fixed reference cells
+      const legendRef = document.getElementById('legendRefCell');
+      if (c.refCells.length > 0) {
+        legendRef.classList.remove('hidden');
+      } else {
+        legendRef.classList.add('hidden');
+      }
+
+      renderSpreadsheetGrid();
+      renderPhase1();
+      renderPhase2();
+      renderPhase3();
+    }
+
+    function renderSpreadsheetGrid() {
+      const c = CASES_DATA[currentCaseIdx];
+      const st = caseStates[currentCaseIdx];
+      const table = document.getElementById('excelGridTable');
+
+      // Header Row (A, B, C...)
+      let html = '<thead><tr class="bg-slate-100 border-b border-slate-300 text-slate-600 font-mono text-xs">';
+      html += '<th class="w-10 py-2 px-2 text-center border-r border-slate-300 bg-slate-200/70"></th>';
+      c.cols.forEach((col) => {
+        html += `<th class="py-2 px-3 text-center font-bold border-r border-slate-300 min-w-[95px]">${col}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      // Data Rows
+      c.grid.forEach((row, rIdx) => {
+        const rowNum = rIdx + 1;
+        const isHeaderRow = rIdx === 0;
+        html += `<tr class="${isHeaderRow ? 'bg-slate-50 font-bold text-slate-800' : 'bg-white text-slate-700'} border-b border-slate-200">`;
+        html += `<td class="py-2 px-2 text-center font-mono text-xs font-semibold text-slate-500 bg-slate-100 border-r border-slate-300">${rowNum}</td>`;
+
+        c.cols.forEach((col, cIdx) => {
+          const coord = `${col}${rowNum}`;
+          const isTarget = c.targetCells.includes(coord);
+          const isRef = c.refCells.includes(coord);
+          const isSelected = selectedCellCoord === coord;
+
+          let rawVal = row[cIdx] !== undefined ? row[cIdx] : '';
+          let displayVal = rawVal;
+
+          // If target cell has been evaluated in Phase 3, display its live calculated output
+          if (isTarget) {
+            if (st.evaluatedCells[coord] !== undefined) {
+              displayVal = st.evaluatedCells[coord];
+            } else {
+              displayVal = '?';
+            }
+          } else if (typeof rawVal === 'number' && c.id === 2 && col === 'D') {
+            displayVal = rawVal.toLocaleString('id-ID');
+          }
+
+          let cellClasses = 'py-2 px-3 border-r border-slate-200 cursor-pointer transition relative ';
+          if (typeof rawVal === 'number' || isTarget) {
+            cellClasses += 'font-mono ';
+          }
+          if (typeof rawVal === 'number' && !isTarget) {
+            cellClasses += 'text-right ';
+          }
+          if (isTarget) {
+            const isCorrectVal = st.evaluatedCells[coord] === c.expectedOutputs[coord];
+            if (st.evaluatedCells[coord] !== undefined) {
+              cellClasses += isCorrectVal
+                ? 'bg-emerald-100/90 text-excel-800 font-extrabold text-center '
+                : 'bg-rose-100 text-rose-800 font-extrabold text-center ';
+            } else {
+              cellClasses += 'bg-emerald-50/90 text-excel-700 font-extrabold text-center target-cell-highlight ';
+            }
+          } else if (isRef) {
+            cellClasses += 'bg-amber-100/90 text-amber-900 font-extrabold text-right ring-1 ring-inset ring-amber-400 ';
+          }
+
+          if (isSelected) {
+            cellClasses += 'ring-2 ring-inset ring-excel-600 z-10 ';
+          }
+
+          html += `<td onclick="selectSpreadsheetCell('${coord}')" class="${cellClasses}" title="Sel ${coord}">${displayVal}</td>`;
+        });
+
+        html += '</tr>';
+      });
+
+      html += '</tbody>';
+      table.innerHTML = html;
+      updateFormulaBarDisplay();
+    }
+
+    function selectSpreadsheetCell(coord) {
+      selectedCellCoord = coord;
+      document.getElementById('activeCellNameBox').textContent = coord;
+      renderSpreadsheetGrid();
+    }
+
+    function updateFormulaBarDisplay() {
+      const c = CASES_DATA[currentCaseIdx];
+      const st = caseStates[currentCaseIdx];
+      const bar = document.getElementById('spreadsheetFormulaDisplay');
+      document.getElementById('activeCellNameBox').textContent = selectedCellCoord;
+
+      if (!st.phase2Locked) {
+        bar.innerHTML = `
+          <span class="inline-flex items-center gap-1.5 text-amber-700 font-sans font-semibold">
+            <i class="fa-solid fa-lock text-[11px]"></i> Selesaikan Prediksi Hasil Terlebih Dahulu
+          </span>
+        `;
+        return;
+      }
+
+      // If unlocked, show formula if target cell selected or raw value otherwise
+      if (c.targetCells.includes(selectedCellCoord)) {
+        const delta = parseCellCoord(selectedCellCoord).rowIdx - parseCellCoord(c.primaryTargetCell).rowIdx;
+        if (st.lastFormula) {
+          const shifted = st.lastFormula.startsWith('=')
+            ? '=' + shiftFormulaRows(st.lastFormula.slice(1), delta)
+            : st.lastFormula;
+          bar.innerHTML = `<span class="text-excel-700 font-bold">${shifted}</span>`;
+        } else {
+          bar.innerHTML = `<span class="text-slate-400 italic">Siap menerima formula untuk sel ${selectedCellCoord}...</span>`;
+        }
+      } else {
+        const val = getCellValue(c.grid, selectedCellCoord);
+        bar.innerHTML = `<span class="text-slate-800">${val === '' ? '(Sel Kosong)' : val}</span>`;
+      }
+    }
+
+    /**
+     * -------------------- PHASE 1: TWO-TIER SELECTION --------------------
+     */
+    function renderPhase1() {
+      const c = CASES_DATA[currentCaseIdx];
+      const st = caseStates[currentCaseIdx];
+
+      const badge = document.getElementById('phase1Badge');
+      const card = document.getElementById('phase1Card');
+      const feedback = document.getElementById('phase1Feedback');
+      document.getElementById('phase1AttemptsText').textContent = `Percobaan diagnosa: ${st.phase1Attempts} kali`;
+
+      if (st.phase1Passed) {
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white';
+        badge.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Terverifikasi';
+        card.className = 'bg-white rounded-2xl border border-emerald-300 shadow-sm overflow-hidden transition-all';
+      } else {
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-excel-800';
+        badge.innerHTML = '<i class="fa-solid fa-unlock mr-1"></i> Aktif';
+        card.className = 'bg-white rounded-2xl border-2 border-excel-600 shadow-sm overflow-hidden transition-all';
+      }
+
+      // Render Function Option Cards
+      const funcGrid = document.getElementById('functionOptionsGrid');
+      funcGrid.innerHTML = c.functionOptions
+        .map((fn) => {
+          const isSelected = st.selectedFunc === fn.name;
+          return `
+            <button
+              type="button"
+              ${st.phase1Passed ? 'disabled' : ''}
+              onclick="selectFunctionOption('${fn.name}')"
+              class="p-3 rounded-xl border text-left transition ${
+                isSelected
+                  ? 'bg-emerald-50 border-excel-600 ring-2 ring-excel-600/20'
+                  : 'bg-white hover:bg-slate-50 border-slate-200'
+              } ${st.phase1Passed ? 'opacity-80 cursor-default' : 'cursor-pointer'}"
+            >
+              <div class="flex items-center justify-between mb-0.5">
+                <span class="font-mono font-extrabold text-sm ${isSelected ? 'text-excel-700' : 'text-slate-900'}">${fn.name}</span>
+                <span class="w-4 h-4 rounded-full border flex items-center justify-center ${
+                  isSelected ? 'border-excel-600 bg-excel-600 text-white' : 'border-slate-300'
+                }">
+                  ${isSelected ? '<i class="fa-solid fa-check text-[9px]"></i>' : ''}
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500 leading-tight">${fn.desc}</p>
+            </button>
+          `;
+        })
+        .join('');
+
+      // Render Two-Tier Reason Radio Cards
+      const reasonList = document.getElementById('reasonOptionsList');
+      reasonList.innerHTML = c.reasonOptions
+        .map((r) => {
+          const isSelected = st.selectedReasonId === r.id;
+          return `
+            <button
+              type="button"
+              ${st.phase1Passed ? 'disabled' : ''}
+              onclick="selectReasonOption('${r.id}')"
+              class="w-full p-3 rounded-xl border text-left transition flex items-start gap-3 ${
+                isSelected
+                  ? 'bg-emerald-50 border-excel-600 ring-2 ring-excel-600/20'
+                  : 'bg-white hover:bg-slate-50 border-slate-200'
+              } ${st.phase1Passed ? 'opacity-80 cursor-default' : 'cursor-pointer'}"
+            >
+              <span class="mt-0.5 w-4 h-4 rounded-full border shrink-0 flex items-center justify-center ${
+                isSelected ? 'border-excel-600 bg-excel-600 text-white' : 'border-slate-300'
+              }">
+                ${isSelected ? '<i class="fa-solid fa-circle text-[6px]"></i>' : ''}
+              </span>
+              <span class="text-xs sm:text-sm text-slate-700 leading-snug">${r.text}</span>
+            </button>
+          `;
+        })
+        .join('');
+
+      const verifyBtn = document.getElementById('btnVerifyPhase1');
+      if (st.phase1Passed) {
+        verifyBtn.classList.add('hidden');
+        feedback.classList.remove('hidden');
+        feedback.className = 'rounded-xl p-3.5 text-xs sm:text-sm bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start gap-2.5';
+        feedback.innerHTML = `
+          <i class="fa-solid fa-circle-check text-excel-600 text-base mt-0.5"></i>
+          <div>
+            <strong>Diagnosa Konseptual Tepat!</strong> Kamu memilih fungsi <code class="font-mono font-bold">${c.correctFunction}</code> dengan alasan logis yang valid. Silakan lanjut ke <b>Tahap 2: Prediksi Hasil</b>.
+          </div>
+        `;
+      } else {
+        verifyBtn.classList.remove('hidden');
+        feedback.classList.add('hidden');
+      }
+    }
+
+    function selectFunctionOption(fnName) {
+      caseStates[currentCaseIdx].selectedFunc = fnName;
+      renderPhase1();
+    }
+
+    function selectReasonOption(reasonId) {
+      caseStates[currentCaseIdx].selectedReasonId = reasonId;
+      renderPhase1();
+    }
+
+    function verifyPhase1() {
+      const c = CASES_DATA[currentCaseIdx];
+      const st = caseStates[currentCaseIdx];
+      const feedback = document.getElementById('phase1Feedback');
+
+      if (!st.selectedFunc || !st.selectedReasonId) {
+        feedback.classList.remove('hidden');
+        feedback.className = 'rounded-xl p-3.5 text-xs sm:text-sm bg-amber-50 border border-amber-200 text-amber-900';
+        feedback.innerHTML = '<i class="fa-solid fa-circle-info mr-1.5 text-amber-600"></i> Pilih <b>fungsi Excel</b> pada Langkah 1A dan <b>alasan logisnya</b> pada Langkah 1B terlebih dahulu.';
+        return;
+      }
+
+      st.phase1Attempts++;
+      document.getElementById('phase1AttemptsText').textContent = `Percobaan diagnosa: ${st.phase1Attempts} kali`;
+
+      const chosenReason = c.reasonOptions.find((r) => r.id === st.selectedReasonId);
+      const isFuncCorrect = st.selectedFunc === c.correctFunction;
+      const isReasonCorrect = chosenReason && chosenReason.isCorrect;
+
+      if (isFuncCorrect && isReasonCorrect) {
+        st.phase1Passed = true;
+        logActivity('Tahap 1 (Select)', c.code, `Berhasil memilih ${c.correctFunction} & alasan logis (Percobaan ke-${st.phase1Attempts})`, 'success');
+        renderPhase1();
+        renderPhase2();
+        updateResearchMetrics();
+      } else {
+        let diagMsg = '';
+        if (!isFuncCorrect && !isReasonCorrect) {
+          diagMsg = `Pilihan fungsi <code>${st.selectedFunc}</code> dan alasannya belum sesuai dengan kebutuhan masalah. ${chosenReason.hint}`;
+        } else if (!isFuncCorrect) {
+          diagMsg = `Alasanmu sudah mengarah ke logika yang tepat, tetapi nama fungsi <code>${st.selectedFunc}</code> kurang sesuai. Coba cocokan kembali karakter fungsi dengan misi soal!`;
+        } else {
+          diagMsg = `Fungsi <code>${st.selectedFunc}</code> sudah tepat, tetapi alasan pada Langkah 1B masih mengandung miskonsepsi: ${chosenReason.hint}`;
+        }
+
+        if (!st.trapsHit.includes('Phase1_Misconception')) {
+          st.trapsHit.push('Phase1_Misconception');
+        }
+        logActivity('Tahap 1 (Select)', c.code, `Percobaan ke-${st.phase1Attempts} keliru (${st.selectedFunc})`, 'warn');
+
+        feedback.classList.remove('hidden');
+        feedback.className = 'rounded-xl p-3.5 text-xs sm:text-sm bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2.5 fade-in';
+        feedback.innerHTML = `
+          <i class="fa-solid fa-circle-xmark text-rose-600 text-base mt-0.5"></i>
+          <div><strong>Belum Tepat — Tinjau Kembali Logikanya:</strong><br/>${diagMsg}</div>
+        `;
+        updateResearchMetrics();
+      }
+    }
+
+    /**
+     * -------------------- PHASE 2: OUTPUT PREDICTION --------------------
+     */
+    function renderPhase2() {
+      const c = CASES_DATA[currentCaseIdx];
+      const st = caseStates[currentCaseIdx];
+
+      const card = document.getElementById('phase2Card');
+      const num = document.getElementById('phase2Number');
+      const badge = document.getElementById('phase2Badge');
+      const lockedOverlay = document.getElementById('phase2LockedOverlay');
+      const body = document.getElementById('phase2Body');
+      const feedback = document.getElementById('phase2Feedback');
+
+      if (!st.phase1Passed) {
+        card.className = 'bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all';
+        num.className = 'w-8 h-8 rounded-xl bg-slate-300 text-slate-600 font-extrabold text-sm flex items-center justify-center';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-600';
+        badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Terkunci';
+        lockedOverlay.classList.remove('hidden');
+        body.classList.add('hidden');
+        return;
+      }
+
+      lockedOverlay.classList.add('hidden');
+      body.classList.remove('hidden');
+
+      if (st.phase2Locked) {
+        card.className = 'bg-white rounded-2xl border border-amber-300 shadow-sm overflow-hidden transition-all';
+        num.className = 'w-8 h-8 rounded-xl bg-amber-500 text-white font-extrabold text-sm flex items-center justify-center';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-white';
+        badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Prediksi Dikunci';
+      } else {
+        card.className = 'bg-white rounded-2xl border-2 border-amber-500 shadow-sm overflow-hidden transition-all';
+        num.className = 'w-8 h-8 rounded-xl bg-amber-500 text-white font-extrabold text-sm flex items-center justify-center';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800';
+        badge.innerHTML = '<i class="fa-solid fa-unlock mr-1"></i> Aktif';
+      }
+
+      // Render Prediction Questions
+      const qContainer = document.getElementById('predictionQuestionsContainer');
+      qContainer.innerHTML = c.predictions
+        .map((q, idx) => {
+          const savedVal = st.predictions[q.id] || '';
+          const isCorrect = String(savedVal).trim().toLowerCase() === String(q.correctAnswer).toLowerCase();
+
+          let inputHtml = '';
+          if (q.type === 'select') {
+            inputHtml = `
+              <div class="flex flex-wrap gap-2 mt-2">
+                ${q.options
+                  .map((opt) => {
+                    const active = savedVal === opt;
+                    return `
+                      <button
+                        type="button"
+                        ${st.phase2Locked ? 'disabled' : ''}
+                        onclick="setPredictionValue('${q.id}', '${opt}')"
+                        class="px-4 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold border transition ${
+                          active
+                            ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                            : 'bg-white hover:bg-amber-50 text-slate-800 border-slate-300'
+                        } ${st.phase2Locked ? 'cursor-default' : 'cursor-pointer'}"
+                      >
+                        ${opt}
+                      </button>
+                    `;
+                  })
+                  .join('')}
+              </div>
+            `;
+          } else {
+            inputHtml = `
+              <input
+                type="number"
+                ${st.phase2Locked ? 'disabled' : ''}
+                value="${savedVal}"
+                oninput="setPredictionValue('${q.id}', this.value)"
+                placeholder="${q.placeholder}"
+                class="mt-2 w-full sm:w-64 px-3.5 py-2 rounded-xl border border-slate-300 font-mono text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-500 disabled:bg-slate-100"
+              />
+            `;
+          }
+
+          let reviewNote = '';
+          if (st.phase2Locked) {
+            reviewNote = isCorrect
+              ? `<p class="mt-2 text-xs text-excel-700 font-semibold"><i class="fa-solid fa-check-circle mr-1"></i> Prediksimu akurat! (${q.explanation})</p>`
+              : `<p class="mt-2 text-xs text-rose-700 font-semibold"><i class="fa-solid fa-circle-info mr-1"></i> Prediksimu: <b>${savedVal}</b> | Seharusnya: <b>${q.correctAnswer}</b> — ${q.explanation}</p>`;
+          }
+
+          return `
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+              <label class="block text-xs sm:text-sm font-semibold text-slate-800">
+                ${idx + 1}. ${q.label}
+              </label>
+              ${inputHtml}
+              ${reviewNote}
+            </div>
+          `;
+        })
+        .join('');
+
+      const lockBtn = document.getElementById('btnLockPrediction');
+      if (st.phase2Locked) {
+        lockBtn.classList.add('hidden');
+        feedback.classList.remove('hidden');
+        const pct = Math.round(st.predictionAccuracy * 100);
+        feedback.className = 'rounded-xl p-3.5 text-xs sm:text-sm bg-sky-50 border border-sky-200 text-sky-950 flex items-start gap-2.5';
+        feedback.innerHTML = `
+          <i class="fa-solid fa-unlock-keyhole text-sky-600 text-base mt-0.5"></i>
+          <div>
+            <strong>Prediksi Dikunci (Akurasi Tracing: ${pct}%)!</strong> Editor Formula Excel pada <b>Tahap 3</b> kini sudah terbuka. Buktikan prediksimu dengan mengetik rumusnya!
+          </div>
+        `;
+      } else {
+        lockBtn.classList.remove('hidden');
+        feedback.classList.add('hidden');
+      }
+    }
+
+    function setPredictionValue(qId, val) {
+      caseStates[currentCaseIdx].predictions[qId] = val;
+      // Re-render only if button select type so input focus isn't lost
+      const q = CASES_DATA[currentCaseIdx].predictions.find((item) => item.id === qId);
+      if (q && q.type === 'select') {
+        renderPhase2();
+      }
+    }
+
+    function lockPredictions() {
+      const c = CASES_DATA[currentCaseIdx];
+      const st = caseStates[currentCaseIdx];
+      const feedback = document.getElementById('phase2Feedback');
+
+      // Ensure all predictions are filled
+      for (const q of c.predictions) {
+        const val = st.predictions[q.id];
+        if (val === undefined || String(val).trim() === '') {
+          feedback.classList.remove('hidden');
+          feedback.className = 'rounded-xl p-3.5 text-xs sm:text-sm bg-rose-50 border border-rose-200 text-rose-900';
+          feedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1.5 text-rose-600"></i> Lengkapi semua kolom prediksi hasil di atas sebelum membuka editor rumus Excel.';
+          return;
+        }
+      }
+
+      // Calculate prediction accuracy
+      let correctCount = 0;
+      c.predictions.forEach((q) => {
+        if (String(st.predictions[q.id]).trim().toLowerCase() === String(q.correctAnswer).toLowerCase()) {
+          correctCount++;
+        }
+      });
+
+      st.predictionAccuracy = correctCount / c.predictions.length;
+      st.phase2Locked = true;
+
+      logActivity(
+        'Tahap 2 (Predict)',
+        c.code,
+        `Mengunci prediksi mental tracing (Akurasi: ${Math.round(st.predictionAccuracy * 100)}%)`,
+        st.predictionAccuracy === 1 ? 'success' : 'warn'
+      );
+
+      renderPhase2();
+      renderPhase3();
+      updateFormulaBarDisplay();
+      updateResearchMetrics();
+    }
+
+    /**
+     * -------------------- PHASE 3: FORMULA TESTING & DEBUGGING --------------------
+     */
+    function renderPhase3() {
+      const c = CASES_DATA[currentCaseIdx];
+      const st = caseStates[currentCaseIdx];
+
+      const card = document.getElementById('phase3Card');
+      const num = document.getElementById('phase3Number');
+      const badge = document.getElementById('phase3Badge');
+      const lockedOverlay = document.getElementById('phase3LockedOverlay');
+      const body = document.getElementById('phase3Body');
+
+      document.getElementById('targetCellLabel').textContent = c.primaryTargetCell;
+
+      if (!st.phase2Locked) {
+        card.className = 'bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all';
+        num.className = 'w-8 h-8 rounded-xl bg-slate-300 text-slate-600 font-extrabold text-sm flex items-center justify-center';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-600';
+        badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Terkunci';
+        lockedOverlay.classList.remove('hidden');
+        body.classList.add('hidden');
+        return;
+      }
+
+      lockedOverlay.classList.add('hidden');
+      body.classList.remove('hidden');
+
+      if (st.completed) {
+        card.className = 'bg-white rounded-2xl border-2 border-excel-600 shadow-sm overflow-hidden transition-all';
+        num.className = 'w-8 h-8 rounded-xl bg-excel-600 text-white font-extrabold text-sm flex items-center justify-center';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-excel-600 text-white';
+        badge.innerHTML = '<i class="fa-solid fa-trophy mr-1"></i> Lulus';
+      } else {
+        card.className = 'bg-white rounded-2xl border-2 border-sky-600 shadow-sm overflow-hidden transition-all';
+        num.className = 'w-8 h-8 rounded-xl bg-sky-600 text-white font-extrabold text-sm flex items-center justify-center';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800';
+        badge.innerHTML = '<i class="fa-solid fa-unlock mr-1"></i> Sandbox Aktif';
+      }
+
+      const input = document.getElementById('formulaInput');
+      input.value = st.lastFormula || '';
+
+      if (st.phase3Attempts > 0) {
+        renderComparisonAndDiagnostics();
+      } else {
+        document.getElementById('comparisonSection').classList.add('hidden');
+        document.getElementById('phase3DiagnosticBox').classList.add('hidden');
+      }
+
+      const nextContainer = document.getElementById('nextCaseContainer');
+      const nextBtn = document.getElementById('btnNextCase');
+      if (st.completed) {
+        nextContainer.classList.remove('hidden');
+        if (currentCaseIdx === CASES_DATA.length - 1) {
+          nextBtn.innerHTML = '<i class="fa-solid fa-chart-line"></i><span>Lihat Rapor & Log Kognitif</span>';
+        } else {
+          nextBtn.innerHTML = '<span>Lanjut ke Kasus Berikutnya</span><i class="fa-solid fa-arrow-right"></i>';
+        }
+      } else {
+        nextContainer.classList.add('hidden');
+      }
+    }
+
+    function syncFormulaBarMirror() {
+      const val = document.getElementById('formulaInput').value;
+      caseStates[currentCaseIdx].lastFormula = val;
+      selectedCellCoord = CASES_DATA[currentCaseIdx].primaryTargetCell;
+      updateFormulaBarDisplay();
+    }
+
+    function insertSnippet(snippet) {
+      const input = document.getElementById('formulaInput');
+      const start = input.selectionStart || input.value.length;
+      const end = input.selectionEnd || input.value.length;
+      const current = input.value;
+      input.value = current.slice(0, start) + snippet + current.slice(end);
+      input.focus();
+      const cursorPos = snippet === '""' ? start + 1 : start + snippet.length;
+      input.setSelectionRange(cursorPos, cursorPos);
+      syncFormulaBarMirror();
+    }
+
+    function executeFormulaTest() {
+      const c = CASES_DATA[currentCaseIdx];
+      const st = caseStates[currentCaseIdx];
+      const rawFormula = document.getElementById('formulaInput').value.trim();
+
+      if (!rawFormula) {
+        const diagBox = document.getElementById('phase3DiagnosticBox');
+        diagBox.classList.remove('hidden');
+        diagBox.className = 'rounded-xl p-4 text-xs sm:text-sm bg-amber-50 border border-amber-200 text-amber-900';
+        diagBox.innerHTML = '<i class="fa-solid fa-keyboard mr-1.5 text-amber-600"></i> Ketikkan formula Excel terlebih dahulu pada kotak <b>fx</b> di atas (diawali tanda <code>=</code>).';
+        return;
+      }
+
+      st.phase3Attempts++;
+      st.lastFormula = rawFormula;
+      st.evaluatedCells = {};
+
+      // Evaluate across all target cells (simulating autofill for Kasus 4)
+      const primaryRowIdx = parseCellCoord(c.primaryTargetCell).rowIdx;
+      let allMatched = true;
+      let syntaxErrorType = null;
+
+      c.targetCells.forEach((cellCoord) => {
+        const rowDelta = parseCellCoord(cellCoord).rowIdx - primaryRowIdx;
+        const evalRes = runExcelFormula(rawFormula, c.grid, rowDelta);
+        if (evalRes.error) {
+          syntaxErrorType = evalRes.error;
+        }
+        st.evaluatedCells[cellCoord] = evalRes.value;
+
+        const expected = c.expectedOutputs[cellCoord];
+        if (String(evalRes.value).toLowerCase() !== String(expected).toLowerCase()) {
+          allMatched = false;
+        }
+      });
+
+      // Refresh Spreadsheet Grid so user sees live results in cells!
+      renderSpreadsheetGrid();
+      renderComparisonAndDiagnostics(syntaxErrorType, allMatched);
+
+      if (allMatched && !syntaxErrorType) {
+        st.completed = true;
+        logActivity(
+          'Tahap 3 (Test)',
+          c.code,
+          `SUKSES! Formula "${rawFormula}" menghasilkan output valid pada semua sel target (Uji ke-${st.phase3Attempts})`,
+          'success'
+        );
+      } else {
+        logActivity(
+          'Tahap 3 (Debug)',
+          c.code,
+          `Uji ke-${st.phase3Attempts} dengan "${rawFormula}" masih perlu perbaikan`,
+          'error'
+        );
+      }
+
+      renderCaseTabs();
+      loadCaseHeaderAndPhase3Footer();
+      updateResearchMetrics();
+    }
+
+    function loadCaseHeaderAndPhase3Footer() {
+      const st = caseStates[currentCaseIdx];
+      const statusPill = document.getElementById('caseStatusPill');
+      const card = document.getElementById('phase3Card');
+      const num = document.getElementById('phase3Number');
+      const badge = document.getElementById('phase3Badge');
+      const nextContainer = document.getElementById('nextCaseContainer');
+      const nextBtn = document.getElementById('btnNextCase');
+
+      if (st.completed) {
+        statusPill.className = 'shrink-0 px-3 py-1 rounded-full text-xs font-bold bg-white text-excel-700 shadow-xs';
+        statusPill.innerHTML = '<i class="fa-solid fa-check-circle mr-1"></i> Tuntas';
+
+        card.className = 'bg-white rounded-2xl border-2 border-excel-600 shadow-sm overflow-hidden transition-all';
+        num.className = 'w-8 h-8 rounded-xl bg-excel-600 text-white font-extrabold text-sm flex items-center justify-center';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-excel-600 text-white';
+        badge.innerHTML = '<i class="fa-solid fa-trophy mr-1"></i> Lulus';
+
+        nextContainer.classList.remove('hidden');
+        if (currentCaseIdx === CASES_DATA.length - 1) {
+          nextBtn.innerHTML = '<i class="fa-solid fa-chart-line"></i><span>Lihat Rapor & Log Kognitif</span>';
+        } else {
+          nextBtn.innerHTML = '<span>Lanjut ke Kasus Berikutnya</span><i class="fa-solid fa-arrow-right"></i>';
+        }
+      }
+    }
+
+    function renderComparisonAndDiagnostics(syntaxErrorType = null, allMatched = false) {
+      const c = CASES_DATA[currentCaseIdx];
+      const st = caseStates[currentCaseIdx];
+
+      const compSection = document.getElementById('comparisonSection');
+      const compBody = document.getElementById('comparisonTableBody');
+      const diagBox = document.getElementById('phase3DiagnosticBox');
+
+      compSection.classList.remove('hidden');
+      document.getElementById('phase3AttemptsBadge').textContent = `Uji ke-${st.phase3Attempts}`;
+
+      // Build comparison rows
+      compBody.innerHTML = c.comparisonSamples
+        .map((sample) => {
+          const userPred = sample.predictionKey ? st.predictions[sample.predictionKey] : '(Otomatis Autofill)';
+          const actualVal = st.evaluatedCells[sample.cell];
+          const isRowOk = String(actualVal).toLowerCase() === String(sample.expected).toLowerCase();
+
+          return `
+            <tr class="${isRowOk ? 'bg-emerald-50/40' : 'bg-rose-50/50'}">
+              <td class="py-2.5 px-3.5 font-semibold text-slate-800">${sample.label}</td>
+              <td class="py-2.5 px-3.5 font-mono text-amber-700 font-bold">${userPred}</td>
+              <td class="py-2.5 px-3.5 font-mono font-extrabold ${isRowOk ? 'text-excel-700' : 'text-rose-700'}">${actualVal}</td>
+              <td class="py-2.5 px-3.5 font-mono text-slate-600">${sample.expected}</td>
+              <td class="py-2.5 px-3.5 text-center">
+                ${
+                  isRowOk
+                    ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-excel-800"><i class="fa-solid fa-check"></i> Cocok</span>'
+                    : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800"><i class="fa-solid fa-xmark"></i> Meleset</span>'
+                }
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+
+      // Check completion state if re-rendering
+      const checkAllOk = c.targetCells.every(
+        (coord) => String(st.evaluatedCells[coord]).toLowerCase() === String(c.expectedOutputs[coord]).toLowerCase()
+      );
+
+      diagBox.classList.remove('hidden');
+
+      if (checkAllOk && !syntaxErrorType) {
+        diagBox.className = 'rounded-xl p-4 text-xs sm:text-sm bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-start gap-3 fade-in';
+        diagBox.innerHTML = `
+          <div class="w-8 h-8 rounded-lg bg-excel-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div>
+            <h4 class="font-extrabold text-excel-800 text-sm">Luar Biasa! Formula Terbukti Valid di Semua Sel Target</h4>
+            <p class="mt-1">
+              Formula <code class="font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-emerald-200">${st.lastFormula}</code> berhasil dievaluasi dan cocok dengan perilaku Microsoft Excel sesungguhnya. Transfer pengetahuanmu pada kasus <b>${c.level}</b> telah teruji!
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      // Syntax-level diagnostic first
+      if (syntaxErrorType === 'MISSING_EQUALS') {
+        diagBox.className = 'rounded-xl p-4 text-xs sm:text-sm bg-amber-50 border border-amber-300 text-amber-950 flex items-start gap-3 fade-in';
+        diagBox.innerHTML = `
+          <i class="fa-solid fa-triangle-exclamation text-amber-600 text-lg mt-0.5"></i>
+          <div>
+            <h4 class="font-extrabold text-amber-900">Kesalahan Sintaks Awal: Lupa Tanda Sama Dengan (=)</h4>
+            <p class="mt-1">Tanpa diawali tanda <code>=</code>, Excel menganggap ketikanmu sebagai teks biasa, bukan rumus perhitungan. Tambahkan <code>=</code> di paling depan!</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (syntaxErrorType === 'PAREN_MISMATCH') {
+        diagBox.className = 'rounded-xl p-4 text-xs sm:text-sm bg-rose-50 border border-rose-300 text-rose-950 flex items-start gap-3 fade-in';
+        diagBox.innerHTML = `
+          <i class="fa-solid fa-code text-rose-600 text-lg mt-0.5"></i>
+          <div>
+            <h4 class="font-extrabold text-rose-900">Kesalahan Sintaks: Kurung Buka & Tutup Tidak Seimbang</h4>
+            <p class="mt-1">Periksa kembali jumlah tanda kurung buka <code>(</code> dan kurung tutup <code>)</code> pada formulamu.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (syntaxErrorType === '#NAME?') {
+        diagBox.className = 'rounded-xl p-4 text-xs sm:text-sm bg-rose-50 border border-rose-300 text-rose-950 flex items-start gap-3 fade-in';
+        diagBox.innerHTML = `
+          <i class="fa-solid fa-spell-check text-rose-600 text-lg mt-0.5"></i>
+          <div>
+            <h4 class="font-extrabold text-rose-900">Galat Excel #NAME? — Nama Fungsi Tidak Dikenali</h4>
+            <p class="mt-1">Periksa ejaan nama fungsi Excel yang kamu ketik (misalnya <code>COUNTA</code>, <code>AVERAGE</code>, <code>SUMIF</code>, atau <code>IF</code>).</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Case-specific Trap / Conceptual Diagnostics
+      const customDiag = c.diagnoseFormula(st.lastFormula, st.evaluatedCells);
+      if (customDiag) {
+        if (!st.trapsHit.includes(customDiag.title)) {
+          st.trapsHit.push(customDiag.title);
+        }
+        diagBox.className = 'rounded-xl p-4 text-xs sm:text-sm bg-rose-50 border border-rose-300 text-rose-950 flex items-start gap-3 fade-in';
+        diagBox.innerHTML = `
+          <i class="fa-solid fa-magnifying-glass-chart text-rose-600 text-lg mt-0.5"></i>
+          <div>
+            <h4 class="font-extrabold text-rose-900">${customDiag.title}</h4>
+            <p class="mt-1">${customDiag.message}</p>
+          </div>
+        `;
+        return;
+      }
+
+      // General fallback diagnostic
+      diagBox.className = 'rounded-xl p-4 text-xs sm:text-sm bg-rose-50 border border-rose-300 text-rose-950 flex items-start gap-3 fade-in';
+      diagBox.innerHTML = `
+        <i class="fa-solid fa-bug text-rose-600 text-lg mt-0.5"></i>
+        <div>
+          <h4 class="font-extrabold text-rose-900">Hasil Aktual Belum Sesuai Target — Lakukan Debugging!</h4>
+          <p class="mt-1">Bandingkan kolom <b>Hasil Aktual Rumusmu</b> dengan <b>Kunci Seharusnya</b> pada tabel di atas. Periksa kembali rentang sel, kriteria teks (gunakan tanda petik ganda <code>"..."</code>), atau operator perbandingan yang dipakai.</p>
+        </div>
+      `;
+    }
+
+    function goToNextCase() {
+      if (currentCaseIdx < CASES_DATA.length - 1) {
+        loadCase(currentCaseIdx + 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        openReportModal();
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 5. RESEARCH VARIABLES COMPUTATION (3 VARIABEL PENELITIAN)
+     * ============================================================================
+     */
+    function computeResearchScores() {
+      let conceptualTotal = 0;
+      let transferTotal = 0;
+      let problemSolvingTotal = 0;
+      let completedCount = 0;
+
+      CASES_DATA.forEach((c, idx) => {
+        const st = caseStates[idx];
+        if (st.completed) completedCount++;
+
+        // 1. Pemahaman Konseptual (25 pts per case = 100%)
+        if (st.phase1Passed) {
+          const penalty = Math.max(0, (st.phase1Attempts - 1) * 5);
+          conceptualTotal += Math.max(10, 25 - penalty);
+        }
+
+        // 2. Transfer Belajar (Weighted: 20 + 25 + 25 + 30 = 100%)
+        if (st.completed) {
+          transferTotal += c.transferWeight;
+        } else if (st.phase2Locked) {
+          transferTotal += Math.round(c.transferWeight * 0.4);
+        } else if (st.phase1Passed) {
+          transferTotal += Math.round(c.transferWeight * 0.2);
+        }
+
+        // 3. Kemampuan Pemecahan Masalah (25 pts per case: 12.5 mental tracing + 12.5 debugging efficiency)
+        if (st.phase2Locked) {
+          problemSolvingTotal += 12.5 * st.predictionAccuracy;
+        }
+        if (st.completed) {
+          const debugPenalty = Math.max(0, (st.phase3Attempts - 1) * 2.5);
+          problemSolvingTotal += Math.max(5, 12.5 - debugPenalty);
+        }
+      });
+
+      return {
+        conceptual: Math.min(100, Math.round(conceptualTotal)),
+        transfer: Math.min(100, Math.round(transferTotal)),
+        problemSolving: Math.min(100, Math.round(problemSolvingTotal)),
+        completedCount,
+      };
+    }
+
+    function updateResearchMetrics() {
+      const scores = computeResearchScores();
+
+      document.getElementById('metricConceptualText').textContent = `${scores.conceptual}%`;
+      document.getElementById('metricConceptualBar').style.width = `${scores.conceptual}%`;
+
+      document.getElementById('metricTransferText').textContent = `${scores.transfer}%`;
+      document.getElementById('metricTransferBar').style.width = `${scores.transfer}%`;
+
+      document.getElementById('metricProblemText').textContent = `${scores.problemSolving}%`;
+      document.getElementById('metricProblemBar').style.width = `${scores.problemSolving}%`;
+
+      document.getElementById('headerCompletedBadge').textContent = `${scores.completedCount}/${CASES_DATA.length}`;
+    }
+
+    function getScorePredicate(score) {
+      if (score >= 85) return { label: 'Sangat Baik (Mahir)', color: 'text-excel-700 bg-emerald-100' };
+      if (score >= 70) return { label: 'Baik (Berkembang)', color: 'text-sky-700 bg-sky-100' };
+      if (score >= 40) return { label: 'Cukup (Proses Latihan)', color: 'text-amber-700 bg-amber-100' };
+      return { label: 'Awal (Belum Terukur Penuh)', color: 'text-slate-600 bg-slate-200' };
+    }
+
+    /**
+     * ============================================================================
+     * 6. MODALS: SYNTAX GUIDE, COGNITIVE REPORT & RESET CONFIRMATION
+     * ============================================================================
+     */
+    function openSyntaxModal() {
+      document.getElementById('syntaxModal').classList.remove('hidden');
+    }
+
+    function closeSyntaxModal() {
+      document.getElementById('syntaxModal').classList.add('hidden');
+    }
+
+    function openReportModal() {
+      const scores = computeResearchScores();
+
+      // Render 3 variable cards inside report modal
+      const vars = [
+        {
+          title: 'Pemahaman Konseptual',
+          score: scores.conceptual,
+          desc: 'Ketepatan memilih fungsi & alasan logis (Two-Tier) tanpa miskonsepsi.',
+          icon: 'fa-brain',
+          accent: 'emerald',
+        },
+        {
+          title: 'Transfer Belajar',
+          score: scores.transfer,
+          desc: 'Kemampuan menerapkan fungsi dari Near Transfer hingga Far Transfer.',
+          icon: 'fa-shuffle',
+          accent: 'amber',
+        },
+        {
+          title: 'Pemecahan Masalah',
+          score: scores.problemSolving,
+          desc: 'Akurasi prediksi mental tracing & efisiensi debugging formula.',
+          icon: 'fa-bug-slash',
+          accent: 'sky',
+        },
+      ];
+
+      document.getElementById('reportVariablesGrid').innerHTML = vars
+        .map((v) => {
+          const pred = getScorePredicate(v.score);
+          return `
+            <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-extrabold text-slate-800">${v.title}</span>
+                  <span class="text-lg font-extrabold font-mono text-slate-900">${v.score}%</span>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed mb-3">${v.desc}</p>
+              </div>
+              <span class="self-start px-2.5 py-0.5 rounded-full text-[11px] font-bold ${pred.color}">
+                ${pred.label}
+              </span>
+            </div>
+          `;
+        })
+        .join('');
+
+      // Render Per-Case Table
+      document.getElementById('reportCaseTableBody').innerHTML = CASES_DATA.map((c, idx) => {
+        const st = caseStates[idx];
+        const predPct = st.phase2Locked ? `${Math.round(st.predictionAccuracy * 100)}%` : '-';
+        return `
+          <tr>
+            <td class="py-2.5 px-3">
+              <div class="font-bold text-slate-800">${c.code}: ${c.title}</div>
+              <div class="text-[11px] text-slate-500">${c.level}</div>
+            </td>
+            <td class="py-2.5 px-3">
+              ${
+                st.completed
+                  ? '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-excel-800">Tuntas</span>'
+                  : '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600">Proses</span>'
+              }
+            </td>
+            <td class="py-2.5 px-3 text-center font-mono">${st.phase1Attempts}x</td>
+            <td class="py-2.5 px-3 text-center font-mono font-bold">${predPct}</td>
+            <td class="py-2.5 px-3 text-center font-mono">${st.phase3Attempts}x</td>
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-700">${st.lastFormula || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Render Cognitive Logs
+      document.getElementById('logCountBadge').textContent = `${cognitiveLogs.length} aktivitas`;
+      const logContainer = document.getElementById('cognitiveLogList');
+      if (cognitiveLogs.length === 0) {
+        logContainer.innerHTML = '<div class="text-slate-500 italic">Belum ada aktivitas terekam. Mulai kerjakan Tahap 1 pada studi kasus!</div>';
+      } else {
+        logContainer.innerHTML = cognitiveLogs
+          .map((item) => {
+            const color =
+              item.status === 'success'
+                ? 'text-emerald-400'
+                : item.status === 'error'
+                ? 'text-rose-400'
+                : 'text-amber-300';
+            return `<div><span class="text-slate-500">[${item.time}]</span> <span class="text-sky-400">[${item.caseCode} • ${item.phase}]</span> <span class="${color}">${item.detail}</span></div>`;
+          })
+          .join('');
+      }
+
+      document.getElementById('copySuccessBanner').classList.add('hidden');
+      document.getElementById('reportModal').classList.remove('hidden');
+    }
+
+    function closeReportModal() {
+      document.getElementById('reportModal').classList.add('hidden');
+    }
+
+    function copyReportSummary() {
+      const scores = computeResearchScores();
+      const name = document.getElementById('studentNameInput').value || 'Siswa';
+      const cls = document.getElementById('studentClassInput').value || '-';
+
+      let text = `=== RAPOR CAPAIAN EXCEL FUNCTION CHALLENGE ===\n`;
+      text += `Nama Peserta Didik : ${name}\n`;
+      text += `Kelas / Kelompok   : ${cls}\n`;
+      text += `Kasus Tuntas       : ${scores.completedCount} dari ${CASES_DATA.length}\n\n`;
+      text += `SKOR VARIABEL PENELITIAN:\n`;
+      text += `- Pemahaman Konseptual        : ${scores.conceptual}%\n`;
+      text += `- Transfer Belajar            : ${scores.transfer}%\n`;
+      text += `- Kemampuan Pemecahan Masalah : ${scores.problemSolving}%\n\n`;
+      text += `RINCIAN PER KASUS:\n`;
+      CASES_DATA.forEach((c, idx) => {
+        const st = caseStates[idx];
+        text += `${idx + 1}. ${c.title} [${c.level}] -> Status: ${st.completed ? 'Tuntas' : 'Belum'} | Formula: ${st.lastFormula || '-'}\n`;
+      });
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = text;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      document.getElementById('copySuccessBanner').classList.remove('hidden');
+    }
+
+    function openConfirmDialog(title, message, onProceed) {
+      document.getElementById('confirmDialogTitle').textContent = title;
+      document.getElementById('confirmDialogMessage').textContent = message;
+      pendingConfirmAction = onProceed;
+      document.getElementById('confirmDialogProceedBtn').onclick = () => {
+        if (pendingConfirmAction) pendingConfirmAction();
+        closeConfirmDialog();
+      };
+      document.getElementById('confirmDialogModal').classList.remove('hidden');
+    }
+
+    function closeConfirmDialog() {
+      document.getElementById('confirmDialogModal').classList.add('hidden');
+      pendingConfirmAction = null;
+    }
+
+    function confirmResetCurrentCase() {
+      const c = CASES_DATA[currentCaseIdx];
+      openConfirmDialog(
+        `Reset ${c.code}?`,
+        `Seluruh jawaban Tahap 1, Tahap 2, dan Tahap 3 pada "${c.title}" akan dikembalikan ke awal.`,
+        () => {
+          caseStates[currentCaseIdx] = {
+            selectedFunc: null,
+            selectedReasonId: null,
+            phase1Attempts: 0,
+            phase1Passed: false,
+            predictions: {},
+            phase2Locked: false,
+            predictionAccuracy: 0,
+            phase3Attempts: 0,
+            lastFormula: '',
+            evaluatedCells: {},
+            completed: false,
+            trapsHit: [],
+          };
+          logActivity('Reset', c.code, 'Mereset ulang seluruh tahapan pada kasus ini', 'warn');
+          loadCase(currentCaseIdx);
+          updateResearchMetrics();
+        }
+      );
+    }
+
+    function resetAllProgress() {
+      openConfirmDialog(
+        'Reset Seluruh Sesi Pembelajaran?',
+        'Semua progres dari Kasus 1 sampai Kasus 4 beserta log kognitif akan dihapus.',
+        () => {
+          for (let i = 0; i < caseStates.length; i++) {
+            caseStates[i] = {
+              selectedFunc: null,
+              selectedReasonId: null,
+              phase1Attempts: 0,
+              phase1Passed: false,
+              predictions: {},
+              phase2Locked: false,
+              predictionAccuracy: 0,
+              phase3Attempts: 0,
+              lastFormula: '',
+              evaluatedCells: {},
+              completed: false,
+              trapsHit: [],
+            };
+          }
+          cognitiveLogs.length = 0;
+          closeReportModal();
+          loadCase(0);
+          updateResearchMetrics();
+        }
+      );
+    }
+
+    // Boot application on load
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
